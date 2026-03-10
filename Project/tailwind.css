@@ -8,4 +8,7 @@ body{
 
 @theme{
     --color-gold: #D6CA94;;
+    --spacing-50: 3.125px;
+}
+@layer components{
 }
