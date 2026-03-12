@@ -10,6 +10,7 @@
 
     <!-- Icons -->
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,34 +20,64 @@
 
 <body>   
     <!-- HeaderBar -->
-    <header class="bg-black fixed top-0 left-1/2 transform -translate-x-1/2 
-                w-full md:w-[90%] lg:w-[75%]
-                h-25 rounded-b-2xl flex items-center 
-                px-5 md:px-20">
-        
-        <div class="hidden lg:flex flex-row gap-5 lg:gap-10 items-center">
+    <header class="headerBar">
+        <nav class="hidden lg:flex flex-row gap-5 lg:gap-10 items-center">
             <!-- Home Icon -->
-            <a href="./index.html" class="text-2xl md:text-3xl flex flex-row items-center text-gold hover:text-white transition-colors hover:underline">
+            <a href="./index.html" class="nav" data-page="index">
                 Home
             </a>
             
-            <!-- Resume Icon -->
-            <a href="./resume.html" class="text-2xl md:text-3xl flex flex-row items-center text-gold hover:text-white transition-colors hover:underline">
-                Resume
-            </a>
-            
             <!-- Projects Icon -->
-            <a href="./projects.html" class="text-2xl md:text-3xl flex flex-row items-center text-gold hover:text-white transition-colors hover:underline">
+            <a href="./projects.html" class="nav" data-page="projects">
                 Projects
             </a>
-        </div>
 
-        <button class="lg:hidden ml-auto ">
-            <i class="fi fi-rr-menu-burger text-5xl text-gold"></i>
+            <!-- Resume Icon -->
+            <a href="#" class="nav">
+                Resume
+            </a>
+        </nav>
+
+        <button id="menu-btn" class="lg:hidden ml-auto">
+            <i class="fi fi-rr-menu-burger text-4xl text-gold"></i>
         </button>
-
-
     </header>
+    <!-- Mobile navigation overlay -->
+    <div id="mobile-menu"
+        class="fixed inset-0 bg-black/40 z-50 lg:hidden
+                flex justify-end
+                opacity-0 pointer-events-none transition-opacity duration-300">
+
+        <!-- Sliding menu panel -->
+        <nav id="menu-panel"
+            class="bg-black w-3/10 max-w-sm flex
+                    justify-center items-start py-25
+                    transform translate-x-full transition-transform duration-300 ease-in-out">
+                    
+            <div class="w-full grid auto-rows-auto gap-5">
+                    <!-- Column 1 -->
+                    <a href="./index.html" class="nav" data-page="index">
+                        Home
+                    </a>
+
+                    <div class="line"></div>
+                        
+                    <a href="./projects.html" class="nav" data-page="projects">
+                        Projects
+                    </a>
+
+                    <div class="line"></div>
+                    
+                    <!-- Column 2 -->
+                    <a href="#" class="nav">
+                        Resume
+                    </a>
+
+            </div>
+
+        </nav>
+    </div>
+    
     
     <main class="pt-30">
         <section id="intro" class="mx-10 md:mx-20 lg:mx-70 top-10 flex flex-row justify-center">
@@ -68,9 +99,46 @@
         </section>
 
         <section id="Highlights" class="mt-10 flex justify-center">
-
         </section>
     </main>
+
+    <!-- Script to toggle mobile menu -->
+    <script>
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const menuPanel = document.getElementById('menu-panel');
+
+        // highlight current page
+        const currentPage = window.location.pathname.split("/").pop();
+
+        function toggleMenu() {
+
+            mobileMenu.classList.toggle('opacity-0');
+            mobileMenu.classList.toggle('pointer-events-none');
+
+            menuPanel.classList.toggle('translate-x-full');
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+
+        // close when clicking outside
+        mobileMenu.addEventListener('click', function(e){
+            if(!menuPanel.contains(e.target)){
+                toggleMenu();
+            }
+        });
+        
+        document.querySelectorAll(".nav").forEach(link => {
+            const linkPage = link.getAttribute("href");
+            const page = href.split('/').pop();
+
+            if (page === currentPage || (currentPage === '' && page === 'index.html')) {
+                link.classList.add('nav-active');
+            } else {
+                link.classList.remove('nav-active');
+            }
+        });
+    </script>
 
 </body>
 </html>

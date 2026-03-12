@@ -10,5 +10,24 @@ body{
     --color-gold: #D6CA94;;
     --spacing-50: 3.125px;
 }
+
 @layer components{
+    .headerBar{
+        @apply bg-black fixed top-0 left-1/2 transform -translate-x-1/2 
+                w-full
+                h-20 flex items-center 
+                px-5 lg:px-100;
+    }
+    .line{
+        @apply w-full h-0.5 bg-gold;
+    }
+
+    .nav{
+        @apply text-2xl md:text-3xl flex flex-col items-center text-gold 
+        hover:text-white transition-colors duration-300;
+    }
+
+    .nav-active{
+        @apply bg-white rounded-xl;
+    }
 }
