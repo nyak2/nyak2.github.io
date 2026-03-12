@@ -23,18 +23,13 @@
     <header class="headerBar">
         <nav class="hidden lg:flex flex-row gap-5 lg:gap-10 items-center">
             <!-- Home Icon -->
-            <a href="./index.html" class="nav" data-page="index">
+            <a href="./index.html" class="nav">
                 Home
             </a>
             
             <!-- Projects Icon -->
-            <a href="./projects.html" class="nav" data-page="projects">
+            <a href="./projects.html" class="nav">
                 Projects
-            </a>
-
-            <!-- Resume Icon -->
-            <a href="#" class="nav">
-                Resume
             </a>
         </nav>
 
@@ -42,37 +37,21 @@
             <i class="fi fi-rr-menu-burger text-4xl text-gold"></i>
         </button>
     </header>
+
     <!-- Mobile navigation overlay -->
-    <div id="mobile-menu"
-        class="fixed inset-0 bg-black/40 z-50 lg:hidden
-                flex justify-end
-                opacity-0 pointer-events-none transition-opacity duration-300">
+    <div id="mobile-menu" class="mobile-menu">
 
         <!-- Sliding menu panel -->
-        <nav id="menu-panel"
-            class="bg-black w-3/10 max-w-sm flex
-                    justify-center items-start py-25
-                    transform translate-x-full transition-transform duration-300 ease-in-out">
-                    
-            <div class="w-full grid auto-rows-auto gap-5">
+        <nav id="menu-panel" class="menu-panel">              
+            <div class="w-[80%] grid auto-rows-auto gap-10">
                     <!-- Column 1 -->
-                    <a href="./index.html" class="nav" data-page="index">
+                    <a href="./index.html" class="nav">
                         Home
                     </a>
 
-                    <div class="line"></div>
-                        
-                    <a href="./projects.html" class="nav" data-page="projects">
+                    <a href="./projects.html" class="nav">
                         Projects
                     </a>
-
-                    <div class="line"></div>
-                    
-                    <!-- Column 2 -->
-                    <a href="#" class="nav">
-                        Resume
-                    </a>
-
             </div>
 
         </nav>
@@ -102,43 +81,35 @@
         </section>
     </main>
 
-    <!-- Script to toggle mobile menu -->
+    <!-- Toggle mobile menu -->
     <script>
-        const menuBtn = document.getElementById('menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
-        const menuPanel = document.getElementById('menu-panel');
+        const menuBtn = document.getElementById("menu-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
 
-        // highlight current page
-        const currentPage = window.location.pathname.split("/").pop();
+        menuBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("open");
+        });
 
-        function toggleMenu() {
-
-            mobileMenu.classList.toggle('opacity-0');
-            mobileMenu.classList.toggle('pointer-events-none');
-
-            menuPanel.classList.toggle('translate-x-full');
-        }
-
-        menuBtn.addEventListener('click', toggleMenu);
-
-        // close when clicking outside
-        mobileMenu.addEventListener('click', function(e){
-            if(!menuPanel.contains(e.target)){
-                toggleMenu();
+        mobileMenu.addEventListener("click", (e) => {
+            if(e.target === mobileMenu){
+                mobileMenu.classList.remove("open");
             }
         });
         
-        document.querySelectorAll(".nav").forEach(link => {
-            const linkPage = link.getAttribute("href");
-            const page = href.split('/').pop();
-
-            if (page === currentPage || (currentPage === '' && page === 'index.html')) {
-                link.classList.add('nav-active');
-            } else {
-                link.classList.remove('nav-active');
-            }
-        });
     </script>
 
+    <!-- Highlight Current Page -->
+    <script>
+        const currentPage = window.location.pathname.split("/").pop();
+
+        document.querySelectorAll(".nav").forEach(link => {
+            let linkPage = link.getAttribute("href").split("/").pop();
+
+        if(linkPage === currentPage || (currentPage === "" && linkPage === "index.html")){
+            link.classList.add("nav-active");
+        }
+        });
+    </script>
+    
 </body>
 </html>

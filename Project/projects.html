@@ -10,6 +10,7 @@
 
     <!-- Icons -->
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,31 +20,92 @@
 
 <body>   
     <!-- HeaderBar -->
-    <div class="bg-black fixed left-1/2 transform -translate-x-1/2 
-                w-[95%] md:w-[80%] lg:w-[75%]
-                h-25 rounded-2xl flex 
-                gap-5 md:gap-9 lg:gap-10
-                items-center 
-                justify-center lg:justify-start 
-                md:px-20 lg:px-25">
-        
-        <!-- Home Icon -->
-        <a href="/index.html" class="text-2xl md:text-3xl flex flex-row items-center text-gold hover:text-white transition-colors hover:underline">
-            Home
-        </a>
-        
-        <!-- Resume Icon -->
-        <a href="/resume.html" class="text-2xl md:text-3xl flex flex-row items-center text-gold hover:text-white transition-colors hover:underline">
-            Resume
-        </a>
-        
-        <!-- Projects Icon -->
-        <a href="/projects.html" class="text-2xl md:text-3xl flex flex-row items-center text-gold hover:text-white transition-colors hover:underline">
-            Projects
-        </a>
+    <header class="headerBar">
+        <nav class="hidden lg:flex flex-row gap-5 lg:gap-10 items-center">
+            <!-- Home Icon -->
+            <a href="./index.html" class="nav">
+                Home
+            </a>
+            
+            <!-- Projects Icon -->
+            <a href="./projects.html" class="nav">
+                Projects
+            </a>
+        </nav>
 
+        <button id="menu-btn" class="lg:hidden ml-auto">
+            <i class="fi fi-rr-menu-burger text-4xl text-gold"></i>
+        </button>
+    </header>
+
+    <!-- Mobile navigation overlay -->
+    <div id="mobile-menu" class="mobile-menu">
+
+        <!-- Sliding menu panel -->
+        <nav id="menu-panel" class="menu-panel">              
+            <div class="w-[80%] grid auto-rows-auto gap-10">
+                    <!-- Column 1 -->
+                    <a href="./index.html" class="nav">
+                        Home
+                    </a>
+
+                    <a href="./projects.html" class="nav">
+                        Projects
+                    </a>
+            </div>
+
+        </nav>
     </div>
+    
+    
+    <main class="pt-30">
+        <section id="intro" class="mx-10 md:mx-20 lg:mx-70 top-10 flex flex-row justify-center">
 
+            <div class="flex flex-col">
+                <h1 class="text-6xl md:text-8xl font-bold text-gold">
+                    Hello
+                </h1>
 
+                <p class="text-3xl md:text-4xl flex text-white">
+                    I'm Aik Chun
+                </p>
+
+                <p class="text-xl md:text-2xl text-white mt-5">
+                    A passionate gameplay programmer based in Malaysia who enjoys bringing game ideas to life through code.
+                </p>
+            </div>
+            
+        </section>
+
+        <section id="Highlights" class="mt-10 flex justify-center">
+        </section>
+    </main>
+
+    <!-- Script to toggle mobile menu -->
+    <script>
+        const menuBtn = document.getElementById("menu-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        menuBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("open");
+        });
+
+        mobileMenu.addEventListener("click", (e) => {
+            if(e.target === mobileMenu){
+                mobileMenu.classList.remove("open");
+            }
+        });
+        
+        // highlight current page
+        const currentPage = window.location.pathname.split("/").pop();
+
+        document.querySelectorAll(".nav").forEach(link => {
+            let linkPage = link.getAttribute("href").split("/").pop();
+
+        if(linkPage === currentPage || (currentPage === "" && linkPage === "index.html")){
+            link.classList.add("nav-active");
+        }
+        });
+    </script>
 </body>
 </html>

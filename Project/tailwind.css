@@ -18,16 +18,35 @@ body{
                 h-20 flex items-center 
                 px-5 lg:px-100;
     }
+
+    .mobile-menu{
+        @apply fixed inset-0 bg-black/40 z-50 lg:hidden
+                flex justify-end
+                opacity-0 pointer-events-none transition-opacity duration-300
+    }
+    
+    .menu-panel{
+        @apply bg-black w-2/5 max-w-sm flex
+                    justify-center items-start py-25
+                    transform translate-x-full transition-transform duration-300 ease-in-out;
+    }
+
+    .mobile-menu.open{ 
+        @apply opacity-100 pointer-events-auto; 
+    } 
+
+    .mobile-menu.open .menu-panel{
+        @apply translate-x-0;
+    }
     .line{
         @apply w-full h-0.5 bg-gold;
     }
 
     .nav{
-        @apply text-2xl md:text-3xl flex flex-col items-center text-gold 
-        hover:text-white transition-colors duration-300;
+        @apply text-2xl md:text-3xl flex flex-col items-center text-gold pointer-events-auto ;
     }
 
     .nav-active{
-        @apply bg-white rounded-xl;
+        @apply bg-gold text-black p-2 rounded-xl pointer-events-none ;
     }
 }
