@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en" class="scroll-smooth">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,16 +10,19 @@
     <link href="./main.css" rel="stylesheet">
 
     <!-- Icons -->
-    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
     <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Outfit:wght@100..900&display=swap"
+        rel="stylesheet">
 </head>
 
-<body>   
+<body>
     <!-- HeaderBar -->
     <header class="headerBar">
         <nav class="hidden lg:flex flex-row gap-5 lg:gap-10 items-center">
@@ -26,7 +30,7 @@
             <a href="/index.html" class="nav">
                 Home
             </a>
-            
+
             <!-- Projects Icon -->
             <a href="/projects.html" class="nav">
                 Projects
@@ -42,25 +46,24 @@
     <div id="mobile-menu" class="mobile-menu">
 
         <!-- Sliding menu panel -->
-        <nav id="menu-panel" class="menu-panel">              
+        <nav id="menu-panel" class="menu-panel">
             <div class="w-[80%] grid auto-rows-auto gap-10">
-                    <!-- Column 1 -->
-                    <a href="/index.html" class="nav">
-                        Home
-                    </a>
+                <!-- Column 1 -->
+                <a href="/index.html" class="nav">
+                    Home
+                </a>
 
-                    <a href="/projects.html" class="nav">
-                        Projects
-                    </a>
+                <a href="/projects.html" class="nav">
+                    Projects
+                </a>
             </div>
 
         </nav>
     </div>
-    
-    
-    <main class="pt-30">
-        <section id="intro" class="mx-10 md:mx-20 lg:mx-70 top-10 flex flex-row justify-center">
 
+
+    <main class="pt-30">
+        <section id="intro" class="flex flex-row justify-start default-margin">
             <div class="flex flex-col">
                 <h1 class="text-6xl md:text-8xl font-bold text-gold">
                     Hello
@@ -71,14 +74,45 @@
                 </p>
 
                 <p class="text-xl md:text-2xl text-white mt-5">
-                    A passionate gameplay programmer based in Malaysia who enjoys bringing game ideas to life through code.
+                    A passionate gameplay programmer based in Malaysia who enjoys bringing game ideas to life through
+                    code.
                 </p>
             </div>
-            
+
         </section>
 
-        <section id="Highlights" class="mt-10 flex justify-center">
+        <section id="Highlights" class="mt-25 p-5 flex justify-center bg-black">
+            <div class="flex flex-col gap-10">
+                <h1 class="text-4xl md:text-6xl font-bold text-gold text-center">
+                    Project Highlights
+                </h1>
+
+                <div class="highlight-card">
+                    <video autoplay muted loop playsinline preload="metadata" class="highlight-video">
+                        <source src="./assets/mindslayer.mp4" type="video/mp4">
+                    </video>
+
+                    <div class="highlight-content">
+                        <h2 class="highlight-title">
+                            Mindslayer
+                        </h2>
+
+                        <p class="highlight-description">
+                            A fast paced first-person shooter where you play as a ruined gambler turned psychic
+                            assassin, taking up deadly contracts that kill with the mind.
+                        </p>
+
+                        <a href="/projects.html" class="highlight-more">
+                            More
+                            <i class="fi fi-rr-angle-small-right flex items-center"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="line"></div>
+
+            </div>
         </section>
+
     </main>
 
     <!-- Toggle mobile menu -->
@@ -91,11 +125,11 @@
         });
 
         mobileMenu.addEventListener("click", (e) => {
-            if(e.target === mobileMenu){
+            if (e.target === mobileMenu) {
                 mobileMenu.classList.remove("open");
             }
         });
-        
+
     </script>
 
     <!-- Highlight Current Page -->
@@ -105,11 +139,12 @@
         document.querySelectorAll(".nav").forEach(link => {
             let linkPage = link.getAttribute("href").split("/").pop();
 
-        if(linkPage === currentPage || (currentPage === "" && linkPage === "index.html")){
-            link.classList.add("nav-active");
-        }
+            if (linkPage === currentPage || (currentPage === "" && linkPage === "index.html")) {
+                link.classList.add("nav-active");
+            }
         });
     </script>
-    
+
 </body>
+
 </html>
