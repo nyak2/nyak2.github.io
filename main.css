@@ -289,6 +289,9 @@
   .pt-20 {
     padding-top: calc(var(--spacing) * 20);
   }
+  .pt-23 {
+    padding-top: calc(var(--spacing) * 23);
+  }
   .pt-25 {
     padding-top: calc(var(--spacing) * 25);
   }
@@ -388,6 +391,11 @@
   .lg\:gap-10 {
     @media (width >= 64rem) {
       gap: calc(var(--spacing) * 10);
+    }
+  }
+  .lg\:pt-0 {
+    @media (width >= 64rem) {
+      padding-top: calc(var(--spacing) * 0);
     }
   }
   .lg\:pt-10 {
