@@ -372,7 +372,7 @@ body {
     left: calc(1 / 2 * 100%);
     z-index: 50;
     display: flex;
-    height: calc(var(--spacing) * 20);
+    height: calc(var(--spacing) * 15);
     width: 100%;
     --tw-translate-x: calc(calc(1 / 2 * 100%) * -1);
     translate: var(--tw-translate-x) var(--tw-translate-y);
@@ -380,6 +380,9 @@ body {
     align-items: center;
     background-color: var(--color-black);
     padding-inline: calc(var(--spacing) * 5);
+    @media (width >= 64rem) {
+      height: calc(var(--spacing) * 20);
+    }
     @media (width >= 64rem) {
       padding-inline: calc(var(--spacing) * 100);
     }

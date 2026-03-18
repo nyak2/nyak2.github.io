@@ -18,7 +18,7 @@ body {
     
     /* #region Header and Navigation */
     .headerBar {
-        @apply bg-black fixed top-0 left-1/2 z-50 transform -translate-x-1/2 w-full h-20 flex items-center px-5 lg:px-100;
+        @apply bg-black fixed top-0 left-1/2 z-50 transform -translate-x-1/2 w-full h-15 lg:h-20 flex items-center px-5 lg:px-100;
     }
 
     .nav {
