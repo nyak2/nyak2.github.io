@@ -51,7 +51,7 @@ body {
     
     /* #region Hightlight Card*/
     .highlight-card {
-        @apply bg-gold relative flex flex-col w-full md:w-[60%] lg:w-125 gap-5 p-3 lg:p-5 rounded-2xl hover:scale-105 transition-transform duration-300;
+        @apply bg-gold relative flex flex-col max-w-lg w-full lg:w-125 gap-5 p-3 lg:p-5 rounded-2xl hover:scale-105 transition-transform duration-300;
     }
     
     .highlight-card.oddEnd {
