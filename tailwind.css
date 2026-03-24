@@ -22,7 +22,7 @@ body {
     }
 
     .nav {
-        @apply text-2xl md:text-3xl flex flex-col items-center text-gold pointer-events-auto;
+        @apply text-2xl md:text-3xl flex flex-col items-center text-gold hover:underline pointer-events-auto;
     }
 
     .nav-active {
@@ -86,5 +86,14 @@ body {
 
     .line {
         @apply w-full h-0.5 bg-gold;
+    }
+
+    .link-content
+    {
+        @apply bg-black rounded-2xl flex flex-row justify-center items-center gap-6 mt-10 ml-auto px-4 py-1 lg:py-2
+    }
+    .link-icons
+    {
+        @apply text-2xl md:text-3xl transition-transform duration-300 hover:scale-110 mt-1
     }
 }
