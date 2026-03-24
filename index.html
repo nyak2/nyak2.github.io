@@ -24,7 +24,7 @@
 
 <body>
     <!-- HeaderBar -->
-    <header class="headerBar">
+    <header id="header" class="headerBar">
         <nav class="hidden lg:flex flex-row gap-5 lg:gap-10 items-center">
             <!-- Home Icon -->
             <a href="/index.html" class="nav"> Home </a>
@@ -55,7 +55,7 @@
     </div>
 
 
-    <main class="pt-25 lg:pt-30">
+    <main class="pt-15 lg:pt-30">
         <section id="intro" class="flex flex-col default-margin">
             <div class="flex flex-col px-5 mx-auto">
                 <h1 class="text-6xl md:text-8xl font-bold text-gold"> Hello </h1>
@@ -67,15 +67,17 @@
                     code.
                 </p>
                 <div class="link-content">
-                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=chunaik0308@gmail.com" target="_blank" rel="noopener noreferrer" class="link-icons">
+                    <a href="https://mail.google.com/mail/?view=cm&fs=1&to=chunaik0308@gmail.com" target="_blank"
+                        rel="noopener noreferrer" class="link-icons">
                         <i class="fi fi-rr-envelope text-gold"></i>
                     </a>
-    
+
                     <a href="/assets/punch.png" target="_blank" rel="noopener noreferrer" class="link-icons">
                         <i class="fi fi-rr-resume text-gold"></i>
                     </a>
-    
-                    <a href="https://www.linkedin.com/in/aikchun"  target="_blank"  rel="noopener noreferrer" class="link-icons">
+
+                    <a href="https://www.linkedin.com/in/aikchun" target="_blank" rel="noopener noreferrer"
+                        class="link-icons">
                         <i class="fi fi-brands-linkedin text-gold"></i>
                     </a>
                 </div>
@@ -83,7 +85,7 @@
 
         </section>
 
-        <section id="Highlights" class="mt-10 flex p-5 justify-center bg-black">
+        <section id="Highlights" class="mt-10 flex p-5 justify-center bg-darkGreen">
             <div class="flex flex-col gap-5">
                 <!-- Section Title -->
                 <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gold text-center"> Project Highlights </h1>
@@ -222,6 +224,28 @@
 
             if (linkPage === currentPage || (currentPage === "" && linkPage === "index.html")) {
                 link.classList.add("nav-active");
+            }
+        });
+    </script>
+
+    <!-- Toggle black background on scroll -->
+    <script>
+        const header = document.getElementById("header");
+        const scrollThreshold = 100; // Adjust this value to change when background appears
+
+        let ticking = false;
+
+        window.addEventListener("scroll", () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    if (window.scrollY > scrollThreshold) {
+                        header.classList.add("withBg");
+                    } else {
+                        header.classList.remove("withBg");
+                    }
+                    ticking = false;
+                });
+                ticking = true;
             }
         });
     </script>

@@ -9,20 +9,33 @@ body {
 @theme {
     --color-gold: #D6CA94;
     --color-darkGold: #524a28;
+    --color-darkGreen: #1E1B17;
 }
 
 @layer components {
     .default-margin {
         @apply mx-5 md:mx-20 lg:mx-100;
     }
-    
+
     /* #region Header and Navigation */
     .headerBar {
-        @apply bg-black fixed top-0 left-1/2 z-50 transform -translate-x-1/2 w-full h-15 lg:h-20 flex items-center px-5 lg:px-100;
+        @apply fixed top-0 left-1/2 z-50 transform -translate-x-1/2 w-full h-15 lg:h-20 flex items-center px-5 lg:px-100 transition-colors duration-300;
+    }
+
+    .headerBar.withBg {
+        @apply bg-darkGreen;
     }
 
     .nav {
-        @apply text-2xl md:text-3xl flex flex-col items-center text-gold hover:underline pointer-events-auto;
+        @apply relative text-2xl md:text-3xl flex flex-col items-center text-gold no-underline pointer-events-auto;
+    }
+
+    .nav::after {
+        @apply content-[''] absolute left-0 bottom-0 h-0.5 bg-gold w-0 transition-all duration-300;
+    }
+
+    .nav:hover::after {
+        @apply w-full;
     }
 
     .nav-active {
@@ -33,67 +46,67 @@ body {
     .mobile-menu {
         @apply fixed inset-0 bg-black/40 z-50 lg:hidden flex justify-end opacity-0 pointer-events-none transition-opacity duration-300
     }
-    
+
     .mobile-menu.open {
         @apply opacity-100 pointer-events-auto;
     }
 
     .menu-panel {
-        @apply bg-black w-2/5 max-w-sm flex justify-center items-start py-25 transform translate-x-full transition-transform duration-300 ease-in-out;
+        @apply bg-darkGreen w-2/5 max-w-sm flex justify-center items-start py-25 transform translate-x-full transition-transform duration-300 ease-in-out;
     }
 
     .mobile-menu.open .menu-panel {
         @apply translate-x-0;
     }
+
     /* #endregion */
 
     /* #endregion */
-    
+
     /* #region Hightlight Card*/
     .highlight-card {
         @apply bg-gold relative flex flex-col max-w-lg w-full lg:w-125 gap-5 p-3 lg:p-5 rounded-2xl hover:scale-105 transition-transform duration-300;
     }
-    
+
     .highlight-card.oddEnd {
         @apply lg:col-span-2 lg:justify-self-center
     }
-    
+
     .highlight-video {
         @apply rounded-2xl object-cover;
     }
-    
+
     .highlight-content {
         @apply flex flex-col px-3 gap-2;
     }
-    
+
     .highlight-title {
         @apply text-3xl lg:text-4xl text-darkGold font-medium underline;
     }
-    
+
     .highlight-description {
         @apply text-xl lg:text-2xl text-darkGold;
     }
-    
+
     .highlight-more {
-        @apply lg:hidden bg-black text-xl text-gold italic py-2 px-3 rounded-xl flex flex-row ml-auto;
+        @apply lg:hidden bg-darkGreen text-xl text-gold italic py-2 px-3 rounded-xl flex flex-row ml-auto;
     }
-    
+
     .highlight-overlay {
         @apply hidden lg:block w-full h-full inset-0 absolute;
     }
-    
+
     /* #endregion */
 
     .line {
         @apply w-full h-0.5 bg-gold;
     }
 
-    .link-content
-    {
-        @apply bg-black rounded-2xl flex flex-row justify-center items-center gap-6 mt-10 ml-auto px-4 py-1 lg:py-2
+    .link-content {
+        @apply bg-darkGreen rounded-2xl flex flex-row justify-center items-center gap-6 mt-10 ml-auto px-4 py-1 lg:py-2
     }
-    .link-icons
-    {
+
+    .link-icons {
         @apply text-2xl md:text-3xl transition-transform duration-300 hover:scale-110 mt-1
     }
 }
