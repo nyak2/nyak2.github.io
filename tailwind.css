@@ -13,9 +13,10 @@ body {
 }
 
 @layer components {
-    .default-main-padding{
+    .default-main-padding {
         @apply pt-15 lg:pt-25;
     }
+
     .default-margin {
         @apply mx-5 md:mx-20 lg:mx-100;
     }
@@ -68,7 +69,7 @@ body {
 
     /* #region Hightlight Card*/
     .highlight-card {
-        @apply bg-gold relative flex flex-col max-w-lg w-full lg:w-125 gap-5 p-3 lg:p-5 rounded-2xl hover:scale-105 transition-transform duration-300;
+        @apply cursor-pointer relative flex flex-col w-full lg:w-165 gap-3 rounded-2xl hover:scale-105 transition-transform duration-300;
     }
 
     .highlight-card.oddEnd {
@@ -76,27 +77,23 @@ body {
     }
 
     .highlight-video {
-        @apply rounded-2xl object-cover;
+        @apply rounded-2xl object-cover border-6 md:border-8 lg:border-10 border-gold;
     }
 
     .highlight-content {
-        @apply flex flex-col px-3 gap-2 items-center;
+        @apply lg:hidden flex flex-col items-center;
     }
 
     .highlight-title {
-        @apply text-2xl lg:text-3xl text-darkGold font-medium underline;
-    }
-
-    .highlight-description {
-        @apply text-xl lg:text-2xl text-darkGold;
-    }
-
-    .highlight-more {
-        @apply lg:hidden bg-darkGreen text-xl text-gold italic py-2 px-3 rounded-xl flex flex-row ml-auto;
+        @apply text-2xl md:text-3xl text-gold font-medium underline decoration-2;
     }
 
     .highlight-overlay {
         @apply hidden lg:block w-full h-full inset-0 absolute;
+    }
+
+    .hover-content {
+        @apply absolute inset-0 flex items-center justify-center bg-black/60 text-white opacity-0 group-hover:opacity-100 transition duration-300;
     }
 
     /* #endregion */
@@ -117,23 +114,27 @@ body {
         @apply text-2xl md:text-3xl transition-transform duration-300 hover:scale-110 mt-1;
     }
 
-    .project-card{
+    .project-card {
         @apply flex flex-col lg:flex-row items-center justify-center gap-5 w-full max-w-6xl;
     }
-    .project-image{
+
+    .project-image {
         @apply w-full h-full object-cover rounded-2xl;
     }
+
     .project-content {
         @apply bg-gold rounded-2xl flex flex-col p-5 gap-3 w-9/10 lg:w-1/2;
     }
 
-    .project-title{
+    .project-title {
         @apply text-3xl text-darkGold font-medium underline;
     }
-    .project-description{
+
+    .project-description {
         @apply text-xl text-darkGold;
     }
-    .project-more{
+
+    .project-more {
         @apply bg-darkGreen text-xl text-gold italic py-2 px-3 rounded-xl flex flex-row ml-auto hover:scale-110 transition-transform duration-300;
     }
 }
