@@ -103,7 +103,7 @@ body {
     }
 
     .intro_bg {
-        @apply flex flex-col bg-[url('/assets/home_bg.svg')] w-full bg-cover bg-position-[50%_75%] bg-no-repeat pb-5 lg:pb-10;
+        @apply flex flex-col bg-[url('/assets/Extras/home_bg.svg')] w-full bg-cover bg-position-[50%_75%] bg-no-repeat pb-5 lg:pb-10;
     }
 
     .link-content {
