@@ -124,7 +124,7 @@ body {
     }
 
     .project-image {
-        @apply w-full h-full object-cover rounded-2xl;
+        @apply w-full h-full rounded-2xl;
     }
 
     .project-content {
