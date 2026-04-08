@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AC's Portfolio</title>
+
+    <!-- Tailwind CSS -->
+    <link href="../main.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Outfit:wght@100..900&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- HeaderBar -->
+    <header id="header" class="headerBar">
+        <nav class="hidden lg:flex flex-row gap-5 lg:gap-10 items-center justify-center">
+            <!-- Home Icon -->
+            <a href="/index.html" class="nav"> Home </a>
+
+            <!-- Projects Icon -->
+            <a href="/projects.html" class="nav"> Projects </a>
+        </nav>
+
+        <button id="menu-btn" class="lg:hidden ml-auto mt-1">
+            <!-- Burger Menu Icon -->
+            <i class="fi fi-rr-menu-burger text-3xl text-gold"></i>
+        </button>
+    </header>
+
+    <!-- Mobile navigation overlay -->
+    <div id="mobile-menu" class="mobile-menu">
+
+        <!-- Sliding menu panel -->
+        <nav id="menu-panel" class="menu-panel">
+            <div class="w-[80%] grid auto-rows-auto gap-10">
+                <!-- Column 1 -->
+                <a href="/index.html" class="nav"> Home </a>
+
+                <a href="/projects.html" class="nav"> Projects </a>
+            </div>
+
+        </nav>
+    </div>
+
+
+    <main class="default-main-padding">
+        <footer class="mt-5">
+            <div class="text-center text-lg text-gold pb-5">
+                ©2026 Aik Chun.<br> All rights reserverd.
+            </div>
+        </footer>
+
+    </main>
+
+    <!-- Toggle mobile menu -->
+    <script>
+        const menuBtn = document.getElementById("menu-btn");
+        const mobileMenu = document.getElementById("mobile-menu");
+
+        menuBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("open");
+        });
+
+        mobileMenu.addEventListener("click", (e) => {
+            if (e.target === mobileMenu) {
+                mobileMenu.classList.remove("open");
+            }
+        });
+
+    </script>
+
+    <!-- Highlight Current Page -->
+    <script>
+        const currentPage = window.location.pathname.split("/").pop();
+
+        document.querySelectorAll(".nav").forEach(link => {
+            let linkPage = link.getAttribute("href").split("/").pop();
+
+            if (linkPage === currentPage || (currentPage === "" && linkPage === "index.html")) {
+                link.classList.add("nav-active");
+            }
+        });
+    </script>
+
+    <!-- Toggle black background on scroll -->
+    <script>
+        const header = document.getElementById("header");
+        const scrollThreshold = 50; // Adjust this value to change when background appears
+
+        let ticking = false;
+
+        window.addEventListener("scroll", () => {
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    if (window.scrollY > scrollThreshold) {
+                        header.classList.add("withBg");
+                    } else {
+                        header.classList.remove("withBg");
+                    }
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+    </script>
+
+</body>
+
+</html>
