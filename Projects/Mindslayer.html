@@ -31,6 +31,9 @@
 
             <!-- Projects Icon -->
             <a href="/projects.html" class="nav"> Projects </a>
+
+            <!-- Projects Icon -->
+            <a href="/Projects/Mindslayer.html" class="nav"> Mindslayer </a>
         </nav>
 
         <button id="menu-btn" class="lg:hidden ml-auto mt-1">
@@ -41,7 +44,6 @@
 
     <!-- Mobile navigation overlay -->
     <div id="mobile-menu" class="mobile-menu">
-
         <!-- Sliding menu panel -->
         <nav id="menu-panel" class="menu-panel">
             <div class="w-[80%] grid auto-rows-auto gap-10">
@@ -49,14 +51,57 @@
                 <a href="/index.html" class="nav"> Home </a>
 
                 <a href="/projects.html" class="nav"> Projects </a>
+
+                <a href="/Projects/Mindslayer.html" class="nav"> Mindslayer </a>
             </div>
 
         </nav>
     </div>
 
 
-    <main class="default-main-padding">
-        <footer class="mt-5">
+    <main>
+        <section class="relative h-100 md:h-150 lg:h-225 overflow-hidden">
+            <video autoplay muted loop playsinline preload="metadata"
+                class="absolute inset-0 w-full h-full object-cover">
+                <source src="/assets/Mindslayer/Mindslayer_trailer.mp4" type="video/mp4">
+            </video>
+            <div class="absolute inset-0 bg-black/60"></div>
+            <div class="relative z-10 flex h-full flex-col justify-center px-6 py-12 md:px-16 lg:px-24 text-gold">
+                <span class="inline-block text-sm uppercase tracking-[0.4em] text-gold mb-4">Unreal Engine 5</span>
+                <h1 class="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">Mindslayer</h1>
+                <p class="max-w-3xl text-base md:text-xl text-slate-200 mt-6">
+                    3D, fast-paced, first-person shooter where you play as a ruined gambler who turned psychic assassin,
+                    entering target's minds and slaying them.
+                </p>
+            </div>
+        </section>
+
+        <section class="my-15 default-margin flex flex-col md:flex-row items-center justify-center gap-5">
+            <div class="bg-gold flex flex-col justify-center items-center rounded-2xl p-8">
+                <h2 class="text-3xl md:text-4xl font-bold text-darkGreen mb-5">Role</h2>
+                <i class="fi fi-rr-robot text-5xl"></i>
+                <p class="text-xl lg:text-2xl text-darkGreen">
+                    AI Programmer
+                </p>
+            </div>
+            <div class="bg-gold flex flex-col justify-center items-center rounded-2xl p-8">
+                <h2 class="text-3xl md:text-4xl font-bold text-darkGreen mb-5">Game Link</h2>
+                <a href="https://orangbotak.itch.io/mindslayer" target="_blank">
+                    <i class="fi fi-rr-link-alt text-4xl"></i>
+                </a>
+            </div>
+        </section>
+
+        <section class="flex flex-col">
+            <div class="p-5 bg-darkGreen justify-center items-center">
+                <h2 class="text-4xl lg:text-5xl text-gold text-center">Contributed Work</h2>
+            </div>
+            <div class="default-margin">
+
+            </div>
+        </section>
+
+        <footer class="mt-16">
             <div class="text-center text-lg text-gold pb-5">
                 ©2026 Aik Chun.<br> All rights reserverd.
             </div>
