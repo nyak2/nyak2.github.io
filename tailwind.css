@@ -117,7 +117,7 @@ body {
     .view-more-arrow {
         @apply transform translate-1 transition duration-300;
     }
-    
+
     /*#region Project Card */
     .project-card {
         @apply flex flex-col lg:flex-row items-center justify-center gap-5 w-full max-w-6xl;
@@ -158,6 +158,43 @@ body {
     }
 
     /* #endregion */
+    .work-overlay {
+        @apply absolute inset-0 bg-black/60;
+    }
 
-    
+    .work-video {
+        @apply absolute inset-0 w-full h-full object-cover;
+    }
+
+    .work-section {
+        @apply relative z-10 flex h-full flex-col justify-center px-6 py-12 md:px-16 lg:px-24;
+    }
+
+    .work-title {
+        @apply text-4xl md:text-6xl lg:text-7xl font-bold leading-tight text-gold;
+    }
+
+    .work-title-engine {
+        @apply inline-block text-sm uppercase tracking-[0.4em] text-gold mb-4;
+    }
+
+    .work-title-genre {
+        @apply max-w-3xl text-base md:text-xl text-white mt-6;
+    }
+
+    .work-role-title {
+        @apply text-3xl md:text-4xl font-bold text-darkGreen underline decoration-2 mb-5;
+    }
+
+    .work-role-description {
+        @apply text-xl lg:text-2xl text-darkGreen text-center;
+    }
+
+    .work-link-title {
+        @apply text-3xl md:text-4xl font-bold text-darkGreen underline decoration-2 mb-5;
+    }
+
+    .work-link-description {
+        @apply text-xl lg:text-2xl italic text-darkGold text-center;
+    }
 }
