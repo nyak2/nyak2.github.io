@@ -14,8 +14,6 @@
     --container-sm: 24rem;
     --container-3xl: 48rem;
     --container-6xl: 72rem;
-    --text-xs: 0.75rem;
-    --text-xs--line-height: calc(1 / 0.75);
     --text-sm: 0.875rem;
     --text-sm--line-height: calc(1.25 / 0.875);
     --text-base: 1rem;
@@ -211,6 +209,9 @@
   .relative {
     position: relative;
   }
+  .static {
+    position: static;
+  }
   .top-1\/2 {
     top: calc(1 / 2 * 100%);
   }
@@ -222,6 +223,9 @@
   }
   .left-3 {
     left: calc(var(--spacing) * 3);
+  }
+  .isolate {
+    isolation: isolate;
   }
   .z-10 {
     z-index: 10;
@@ -466,10 +470,6 @@
     font-size: var(--text-xl);
     line-height: var(--tw-leading, var(--text-xl--line-height));
   }
-  .text-xs {
-    font-size: var(--text-xs);
-    line-height: var(--tw-leading, var(--text-xs--line-height));
-  }
   .leading-relaxed {
     --tw-leading: var(--leading-relaxed);
     line-height: var(--leading-relaxed);
@@ -580,6 +580,11 @@
       line-height: var(--tw-leading, var(--text-8xl--line-height));
     }
   }
+  .lg\:mx-50 {
+    @media (width >= 64rem) {
+      margin-inline: calc(var(--spacing) * 50);
+    }
+  }
   .lg\:flex {
     @media (width >= 64rem) {
       display: flex;
@@ -640,6 +645,17 @@
       gap: calc(var(--spacing) * 25);
     }
   }
+  .lg\:rounded-2xl {
+    @media (width >= 64rem) {
+      border-radius: var(--radius-2xl);
+    }
+  }
+  .lg\:border-2 {
+    @media (width >= 64rem) {
+      border-style: var(--tw-border-style);
+      border-width: 2px;
+    }
+  }
   .lg\:object-contain {
     @media (width >= 64rem) {
       object-fit: contain;
@@ -649,6 +665,12 @@
     @media (width >= 64rem) {
       font-size: var(--text-3xl);
       line-height: var(--tw-leading, var(--text-3xl--line-height));
+    }
+  }
+  .lg\:text-4xl {
+    @media (width >= 64rem) {
+      font-size: var(--text-4xl);
+      line-height: var(--tw-leading, var(--text-4xl--line-height));
     }
   }
   .lg\:text-5xl {
@@ -667,12 +689,6 @@
     @media (width >= 64rem) {
       font-size: var(--text-lg);
       line-height: var(--tw-leading, var(--text-lg--line-height));
-    }
-  }
-  .lg\:text-sm {
-    @media (width >= 64rem) {
-      font-size: var(--text-sm);
-      line-height: var(--tw-leading, var(--text-sm--line-height));
     }
   }
 }
@@ -1172,7 +1188,16 @@ body {
       line-height: var(--tw-leading, var(--text-xl--line-height));
     }
   }
-  .work-role-title {
+  .work-content-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-2xl);
+    background-color: var(--color-gold);
+    padding: calc(var(--spacing) * 8);
+  }
+  .work-content-title {
     margin-bottom: calc(var(--spacing) * 5);
     font-size: var(--text-3xl);
     line-height: var(--tw-leading, var(--text-3xl--line-height));
@@ -1186,36 +1211,11 @@ body {
       line-height: var(--tw-leading, var(--text-4xl--line-height));
     }
   }
-  .work-role-description {
+  .work-content-description {
     text-align: center;
     font-size: var(--text-xl);
     line-height: var(--tw-leading, var(--text-xl--line-height));
     color: var(--color-darkGreen);
-    @media (width >= 64rem) {
-      font-size: var(--text-2xl);
-      line-height: var(--tw-leading, var(--text-2xl--line-height));
-    }
-  }
-  .work-link-title {
-    margin-bottom: calc(var(--spacing) * 5);
-    font-size: var(--text-3xl);
-    line-height: var(--tw-leading, var(--text-3xl--line-height));
-    --tw-font-weight: var(--font-weight-bold);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-darkGreen);
-    text-decoration-line: underline;
-    text-decoration-thickness: 2px;
-    @media (width >= 48rem) {
-      font-size: var(--text-4xl);
-      line-height: var(--tw-leading, var(--text-4xl--line-height));
-    }
-  }
-  .work-link-description {
-    text-align: center;
-    font-size: var(--text-xl);
-    line-height: var(--tw-leading, var(--text-xl--line-height));
-    color: var(--color-darkGold);
-    font-style: italic;
     @media (width >= 64rem) {
       font-size: var(--text-2xl);
       line-height: var(--tw-leading, var(--text-2xl--line-height));

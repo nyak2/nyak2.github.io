@@ -20,6 +20,14 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Outfit:wght@100..900&display=swap"
         rel="stylesheet">
+
+    <!-- Prism -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-csharp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
 </head>
 
 <body>
@@ -67,25 +75,20 @@
             </video> -->
             <div class="work-overlay"></div>
             <div class="work-section">
-                <span class="work-title-engine">Coming Soon</span>
-                <h1 class="work-title">Unannounced Title</h1>
-                <p class="work-title-genre">
-                    Coming Soon
-                </p>
+                <span class="work-title-engine"> Coming Soon </span>
+                <h1 class="work-title"> Unannounced Title </h1>
+                <p class="work-title-genre"> Coming Soon </p>
             </div>
         </section>
 
         <section class="my-15 default-margin flex flex-col md:flex-row items-center justify-center gap-5">
-            <div class="bg-gold flex flex-col justify-center items-center rounded-2xl p-8">
-                <h2 class="work-role-title">Role</h2>
-                <p class="work-role-description">
-                    Gameplay Programmer
-                </p>
+            <div class="work-content-section">
+                <h2 class="work-content-title">Role</h2>
+                <p class="work-content-description">Gameplay Programmer</p>
             </div>
-            <div class="bg-gold flex flex-col justify-center items-center rounded-2xl p-8">
-                <h2 class="work-link-title">Game Link</h2>
-                <!-- <a href="https://orangbotak.itch.io/mindslayer" target="_blank"> -->
-                <p class="work-link-description"> Coming Soon</p>
+            <div class="work-content-section">
+                <h2 class="work-content-title">Game Link</h2>
+                <p class="work-content-description"> Coming Soon</p>
                 <!-- </a> -->
             </div>
         </section>
@@ -136,7 +139,8 @@
                     <div class="p-6 border-b border-gold bg-darkGreen">
                         <h3 class="text-2xl lg:text-3xl font-bold text-gold mb-2">Node Map Generator</h3>
                         <p class="text-white text-md lg:text-lg leading-relaxed">
-                            Generates a branching node map based on a set of input parameters
+                            Generates a procedural node-based map with dynamic paths, room diversity and configurable
+                            connectivity rules.
                         </p>
                     </div>
 
@@ -144,15 +148,28 @@
                     <div class="p-6 flex flex-col">
                         <div class="flex flex-row mb-3">
                             <h4 class="text-2xl lg:text-3xl font-bold text-gold">Code Snippet</h4>
-                            <a href="#" target="_blank"
+                            <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
                                 class="px-4 py-2 ml-auto bg-gold text-black rounded font-semibold text-center hover:bg-opacity-80 transition">
-                                <i class="fi fi-brands-github"></i> View Full Code
+                                View Full Code
                             </a>
                         </div>
                         <div class="code-viewer bg-black rounded-lg p-4 overflow-auto border border-gold">
-                            <pre class="text-xs lg:text-sm text-white font-mono"><code>// Your code snippet here
-function example() {
-    console.log("Hello");
+                            <pre class="line-numbers"><code class="language-csharp">public static List<List<MapRoomNode>> GenerateNodeMap(MapNodeConfiguration config)
+{
+    var columnCounts = new List<int>();
+    foreach (var mapColumn in config.NodeMap)
+    {
+        columnCounts.Add(mapColumn.column);
+    }
+
+    ResetShopTracking(config);
+
+    var map = CreateNodes(config.NodeMap.Count, columnCounts, config);
+    map = CreatePaths(map);
+    map = CleanUpPaths(map);
+    map = RemovePathRandomly(map, config);
+
+    return map;
 }
 </code></pre>
                         </div>

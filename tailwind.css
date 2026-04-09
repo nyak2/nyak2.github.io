@@ -158,6 +158,8 @@ body {
     }
 
     /* #endregion */
+    
+    /* #region Work Detail */
     .work-overlay {
         @apply absolute inset-0 bg-black/60;
     }
@@ -182,19 +184,17 @@ body {
         @apply max-w-3xl text-base md:text-xl text-white mt-6;
     }
 
-    .work-role-title {
+    .work-content-section {
+        @apply bg-gold flex flex-col justify-center items-center rounded-2xl p-8;
+    }
+    .work-content-title {
         @apply text-3xl md:text-4xl font-bold text-darkGreen underline decoration-2 mb-5;
     }
 
-    .work-role-description {
+    .work-content-description {
         @apply text-xl lg:text-2xl text-darkGreen text-center;
     }
 
-    .work-link-title {
-        @apply text-3xl md:text-4xl font-bold text-darkGreen underline decoration-2 mb-5;
-    }
+    /* #endregion */
 
-    .work-link-description {
-        @apply text-xl lg:text-2xl italic text-darkGold text-center;
-    }
 }

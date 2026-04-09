@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapNodeGenerator.cs</title>
+
+    <!-- Tailwind CSS -->
+    <link href="../../../main.css" rel="stylesheet">
+
+    <!-- Prism -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-csharp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+</head>
+
+<body>
+    <main>
+        <section class="flex flex-col bg-darkGreen py-10 ">
+            <div class="flex flex-col gap-5 lg:gap-10 lg:mx-50">
+                <h2 class="text-gold text-3xl lg:text-4xl text-center underline"> MapNodeGenerator.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers lg:border-2 border-gold lg:rounded-2xl text-white font-mono"><code class="language-csharp">using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+
+namespace Gameplay
+{
+    public static class MapNodeGenerator
+    {
+        private static int shopCount = 0;
+        private static float shopChanceMultiplier = 1f;
+
+        public static List<List<MapRoomNode>> GenerateNodeMap(MapNodeConfiguration config)
+        {
+            var columnCounts = new List<int>();
+            foreach (var mapColumn in config.NodeMap)
+            {
+                columnCounts.Add(mapColumn.column);
+            }
+
+            ResetShopTracking(config);
+
+            var map = CreateNodes(config.NodeMap.Count, columnCounts, config);
+            map = CreatePaths(map);
+            map = CleanUpPaths(map);
+            map = RemovePathRandomly(map, config);
+
+            return map;
+        }
+
+        private static List<List<MapRoomNode>> CreateNodes(int row, List<int> columnCounts, MapNodeConfiguration config)
+        {
+            var map = new List<List<MapRoomNode>>();
+
+            for (int y = 0; y < row; y++)
+            {
+                var currentRow = new List<MapRoomNode>();
+                var currentRowDifficulty = config.NodeMap[y].difficulty;
+                int columnsInThisRow = columnCounts[y];
+
+                // Track category usage in this row
+                var usedCategories = new Dictionary<RoomCategory, int>();
+
+                for (int x = 0; x < columnsInThisRow; x++)
+                {
+                    if (y == 0)
+                    {
+                        // dont minus one since its a list and the max range is exclusive
+                        var randomRoomIndex = Random.Range(0, config.StartingCategories.Count);             
+                        var roomCategory = config.StartingCategories[randomRoomIndex];
+
+                        currentRow.Add(new MapRoomNode(x, y, roomCategory, MapNodeState.REACHABLE, currentRowDifficulty));
+                        continue;
+                    }
+                    else if (y == row - 1 && config.ForceLastNodeBoss)
+                    {
+                        currentRow.Add(new MapRoomNode(x, y, RoomCategory.BOSS, default, currentRowDifficulty));
+                        continue;
+                    }
+
+                    // Select category with row diversity in mind
+                    var randomCategory = SelectRandomCategoryWithDiversity(y, row, config, usedCategories, columnsInThisRow);
+                    currentRow.Add(new MapRoomNode(x, y, randomCategory, default, currentRowDifficulty));
+
+                    // Track usage
+                    if (!usedCategories.ContainsKey(randomCategory))
+                        usedCategories[randomCategory] = 0;
+                    usedCategories[randomCategory]++;
+                }
+                map.Add(currentRow);
+            }
+            return map;
+        }
+
+        private static RoomCategory SelectRandomCategoryWithDiversity(int currentRow, int totalRows, MapNodeConfiguration config, 
+                                                                        Dictionary<RoomCategory, int> usedInRow, int totalNodesInRow)
+        {
+            var random = new System.Random();
+            bool isPastHalf = currentRow >= Mathf.CeilToInt(totalRows / 2.5f);
+
+            // Calculate max allowed per category (e.g., no more than 50% of row can be same category)
+            int maxPerCategory = Mathf.Max(1, Mathf.CeilToInt(totalNodesInRow * 0.5f));
+
+            List<RoomCategory> availableCategories = new List<RoomCategory>();
+
+            foreach (var category in config.BaseCategories)
+            {
+                // Check if this category hasn't exceeded the limit
+                if (!usedInRow.ContainsKey(category) || usedInRow[category] < maxPerCategory)
+                {
+                    availableCategories.Add(category);
+                }
+            }
+
+            // Handle shops with both diversity and original rules
+            if (isPastHalf && shopCount < config.MaxShop)
+            {
+                bool canAddShopCombat = !usedInRow.ContainsKey(RoomCategory.SHOP_COMBAT) ||
+                                        usedInRow[RoomCategory.SHOP_COMBAT] < maxPerCategory;
+                bool canAddShopSurvival = !usedInRow.ContainsKey(RoomCategory.SHOP_SURVIVAL) ||
+                                          usedInRow[RoomCategory.SHOP_SURVIVAL] < maxPerCategory;
+
+                int shopWeight = Mathf.RoundToInt(1 * shopChanceMultiplier);
+                for (int i = 0; i < shopWeight; i++)
+                {
+                    if (canAddShopCombat) availableCategories.Add(RoomCategory.SHOP_COMBAT);
+                    if (canAddShopSurvival) availableCategories.Add(RoomCategory.SHOP_SURVIVAL);
+                }
+            }
+
+            // Fallback: if all categories are at limit (shouldn't happen with proper max settings)
+            if (availableCategories.Count == 0)
+            {
+                availableCategories.AddRange(config.BaseCategories);
+            }
+
+            var selectedCategory = availableCategories[random.Next(availableCategories.Count)];
+
+            // Track shop count and manage chance multiplier (existing logic)
+            if (selectedCategory == RoomCategory.SHOP_COMBAT || selectedCategory == RoomCategory.SHOP_SURVIVAL)
+            {
+                shopCount++;
+                shopChanceMultiplier = config.BaseShopChanceMultiplier;
+            }
+            else if (isPastHalf && shopCount < config.MaxShop)
+            {
+                shopChanceMultiplier += config.ShopChanceIncrement;
+            }
+
+            return selectedCategory;
+        }
+
+        private static RoomCategory SelectRandomCategory(int currentRow, int totalRows, MapNodeConfiguration config)
+        {
+            var random = new System.Random();
+
+            // Check if we're past halfway point
+            bool isPastHalf = currentRow >= Mathf.CeilToInt(totalRows / 2.5f);
+
+            // Get available categories based on rules
+            List<RoomCategory> availableCategories = new List<RoomCategory>();
+
+            foreach (var category in config.BaseCategories)
+            {
+                availableCategories.Add(category); 
+            }
+            // SHOP: Only after half the map AND under max limit
+            if (isPastHalf && shopCount < config.MaxShop)
+            {
+                // Add shop multiple times based on chance multiplier to increase its probability
+                int shopWeight = Mathf.RoundToInt(1 * shopChanceMultiplier);
+                for (int i = 0; i < shopWeight; i++)
+                {
+                    availableCategories.Add(RoomCategory.SHOP_COMBAT);
+                    availableCategories.Add(RoomCategory.SHOP_SURVIVAL);
+                }
+            }
+
+            // Select random category
+            var selectedCategory = availableCategories[random.Next(availableCategories.Count)];
+
+            // Track shop count and manage chance multiplier
+            if (selectedCategory == RoomCategory.SHOP_COMBAT || selectedCategory == RoomCategory.SHOP_SURVIVAL)
+            {
+                shopCount++;
+                shopChanceMultiplier = config.BaseShopChanceMultiplier; // Reset chance multiplier when shop is picked
+            }
+            else if (isPastHalf && shopCount < config.MaxShop)
+            {
+                // Increase chance multiplier when shop is NOT picked (but could have been)
+                shopChanceMultiplier += config.ShopChanceIncrement;
+            }
+
+            return selectedCategory;
+        }
+
+        // Add this method to reset static variables when generating a new map
+        private static void ResetShopTracking(MapNodeConfiguration config)
+        {
+            shopCount = 0;
+            shopChanceMultiplier = config.BaseShopChanceMultiplier;
+        }
+        private static List<List<MapRoomNode>> CreatePaths(List<List<MapRoomNode>> nodes)
+        {
+            var map = nodes;
+
+            if (map.Count == 0 || map[0].Count == 0)
+                return map;
+
+            // Process each row sequentially
+            for (int y = 0; y < map.Count - 1; y++)
+            {
+                int nextY = y + 1;
+                int currentRowSize = map[y].Count;
+                int nextRowSize = map[nextY].Count;
+
+                // Track which nodes in the next row have been connected to
+                var connectedTargets = new HashSet<int>();
+
+                int connectionsToMake = currentRowSize + nextRowSize - 1;
+                // Process each node in the current row
+                for (int x = 0; x < currentRowSize; x++)
+                {
+                    var currentNode = map[y][x];
+
+                    // Calculate reachable nodes based on relative position and row sizes
+                    List<int> reachableNodes = CalculateReachableNodes(x, currentRowSize, nextRowSize);
+
+                    // Create list of possible targets within reach
+                    var possibleTargets = new List<int>();
+
+                    foreach (int targetX in reachableNodes)
+                    {
+                        possibleTargets.Add(targetX);
+                    }
+
+                    // Create connections
+                    var usedTargets = new List<int>();
+
+                    foreach (int targetX in possibleTargets)
+                    {
+                        // Check if connection already exists
+                        bool connectionExists = currentNode.Edges.Any(e =>
+                            e.DstColumn == targetX && e.DstRow == nextY);
+
+                        if (!connectionExists)
+                        {
+                            var newEdge = new MapEdge(x, y, targetX, nextY);
+                            currentNode.Edges.Add(newEdge);
+                            map[nextY][targetX].Parents.Add(new Point(x, y));
+                            usedTargets.Add(targetX);
+                        }
+                    }
+
+                    // Mark these targets as connected
+                    foreach (int target in usedTargets)
+                    {
+                        connectedTargets.Add(target);
+                    }
+                }
+            }
+
+            return map;
+        }
+
+        private static List<int> CalculateReachableNodes(int nodeIndex, int currentRowSize, int nextRowSize)
+        {
+            var reachableNodes = new List<int>();
+
+            // Calculate the relative position of the node in its row (0.0 to 1.0)
+            float relativePosition = currentRowSize > 1 ? (float)nodeIndex / (currentRowSize - 1) : 0.5f;
+
+            // Map this position to the next row
+            float targetPosition = relativePosition * (nextRowSize - 1);
+
+            // When rows are same size, use simple adjacent rule
+            if (currentRowSize == nextRowSize)
+            {
+                int minReach = Mathf.Max(0, nodeIndex - 1);
+                int maxReach = Mathf.Min(nextRowSize - 1, nodeIndex + 1);
+
+                for (int i = minReach; i <= maxReach; i++)
+                {
+                    reachableNodes.Add(i);
+                }
+            }
+            // When current row is larger (converging)
+            else if (currentRowSize > nextRowSize)
+            {
+                // Multiple nodes may need to connect to the same target
+                int baseTarget = Mathf.RoundToInt(targetPosition);
+
+                baseTarget = Mathf.Clamp(baseTarget, 0, nextRowSize - 1);
+
+                reachableNodes.Add(baseTarget);
+
+                //Add adjacent nodes if they exist
+                if (baseTarget > 0 && !reachableNodes.Contains(baseTarget - 1))
+                    reachableNodes.Add(baseTarget - 1);
+                if (baseTarget < nextRowSize - 1 && !reachableNodes.Contains(baseTarget + 1))
+                    reachableNodes.Add(baseTarget + 1);
+                //// For edge nodes, ensure they have enough options
+                //if (nodeIndex == 0)
+                //{
+                //    reachableNodes.Clear();
+                //    reachableNodes.Add(0);
+                //    if (nextRowSize > 1) reachableNodes.Add(1);
+                //}
+                //else if (nodeIndex == currentRowSize - 1)
+                //{
+                //    reachableNodes.Clear();
+                //    reachableNodes.Add(nextRowSize - 1);
+                //    if (nextRowSize > 1) reachableNodes.Add(nextRowSize - 2);
+                //}
+            }
+            // When current row is smaller (diverging)
+            else
+            {
+                // One node may need to connect to multiple targets
+                int baseTarget = Mathf.FloorToInt(targetPosition);
+                int ceilTarget = Mathf.CeilToInt(targetPosition);
+
+                baseTarget = Mathf.Clamp(baseTarget, 0, nextRowSize - 1);
+                ceilTarget = Mathf.Clamp(ceilTarget, 0, nextRowSize - 1);
+
+                reachableNodes.Add(baseTarget);
+                if (ceilTarget != baseTarget)
+                    reachableNodes.Add(ceilTarget);
+
+                if (currentRowSize == 1)
+                {
+                    for (int i = 0; i < nextRowSize; i++)
+                    {
+                        if (!reachableNodes.Contains(i))
+                        {
+                            reachableNodes.Add(i);
+                        }
+                    }
+                }
+                else
+                {
+                    //// Special handling for edge nodes
+                    //if (nodeIndex == 0)
+                    //{
+                    //    reachableNodes.Add(baseTarget + 1);
+                    //}
+                    //else if (nodeIndex == currentRowSize - 1)
+                    //{
+                    //    reachableNodes.Add(baseTarget - 1);
+                    //}
+
+                    // Special handling for edge nodes
+                    if (nodeIndex == 0)
+                    {
+                        for (int i = 0; i <= Mathf.Min(2, nextRowSize - 1); i++)
+                        {
+                            if (!reachableNodes.Contains(i))
+                                reachableNodes.Add(i);
+                        }
+                    }
+                    else if (nodeIndex == currentRowSize - 1)
+                    {
+                        for (int i = Mathf.Max(0, nextRowSize - 3); i < nextRowSize; i++)
+                        {
+                            if (!reachableNodes.Contains(i))
+                                reachableNodes.Add(i);
+                        }
+                    }
+                }
+
+            }
+
+            // Sort for consistency
+            reachableNodes.Sort();
+            return reachableNodes;
+        }
+
+        private static List<List<MapRoomNode>> CleanUpPaths(List<List<MapRoomNode>> nodes)
+        {
+            for (int rowIndex = 0; rowIndex < nodes.Count - 1; rowIndex++)
+            {
+                var currentRow = nodes[rowIndex];
+                var nextRow = nodes[rowIndex + 1];
+
+                // Pre-calculate connection counts for efficiency
+                var edgeCounts = new int[currentRow.Count];
+                var parentCounts = new int[nextRow.Count];
+
+                for (int i = 0; i < currentRow.Count; i++)
+                    edgeCounts[i] = currentRow[i].Edges.Count;
+
+                for (int i = 0; i < nextRow.Count; i++)
+                    parentCounts[i] = nextRow[i].Parents.Count;
+
+                bool foundCrossing = true;
+
+                while (foundCrossing)
+                {
+                    foundCrossing = false;
+                    MapEdge edgeToRemove = null;
+                    int nodeToModify = -1;
+                    int bestPriority = int.MaxValue;
+
+                    // Find all crossings in one pass
+                    for (int i = 0; i < currentRow.Count - 1; i++)
+                    {
+                        if (edgeCounts[i] == 0) continue;
+
+                        var node1Edges = currentRow[i].Edges;
+
+                        for (int j = i + 1; j < currentRow.Count; j++)
+                        {
+                            if (edgeCounts[j] == 0) continue;
+
+                            var node2Edges = currentRow[j].Edges;
+
+                            // Check each edge pair for crossing
+                            foreach (var edge1 in node1Edges)
+                            {
+                                foreach (var edge2 in node2Edges)
+                                {
+                                    // Crossing detected: i->edge1.DstColumn crosses j->edge2.DstColumn
+                                    if (edge1.DstColumn > edge2.DstColumn)
+                                    {
+                                        // Calculate priorities for both possible removals
+                                        int priority1 = CalculateRemovalPriority(
+                                            edgeCounts[i],
+                                            parentCounts[edge1.DstColumn]
+                                        );
+
+                                        int priority2 = CalculateRemovalPriority(
+                                            edgeCounts[j],
+                                            parentCounts[edge2.DstColumn]
+                                        );
+
+                                        // Choose the edge with lower impact (higher priority value means safer to remove)
+                                        if (priority1 > priority2 && priority1 < bestPriority)
+                                        {
+                                            edgeToRemove = edge1;
+                                            nodeToModify = i;
+                                            bestPriority = priority1;
+                                        }
+                                        else if (priority2 >= priority1 && priority2 < bestPriority)
+                                        {
+                                            edgeToRemove = edge2;
+                                            nodeToModify = j;
+                                            bestPriority = priority2;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Remove the best candidate edge if found
+                    if (edgeToRemove != null && nodeToModify != -1)
+                    {
+                        // Update the edge
+                        currentRow[nodeToModify].Edges.Remove(edgeToRemove);
+                        edgeCounts[nodeToModify]--;
+
+                        // Update parent reference
+                        var targetNode = nextRow[edgeToRemove.DstColumn];
+                        var parentPoint = new Point(nodeToModify, rowIndex);
+                        targetNode.Parents.RemoveAll(p => p.X == parentPoint.X && p.Y == parentPoint.Y);
+                        parentCounts[edgeToRemove.DstColumn]--;
+
+                        foundCrossing = true;
+                    }
+                }
+            }
+
+            return nodes;
+        }
+
+        private static int CalculateRemovalPriority(int sourceEdgeCount, int targetParentCount)
+        {
+            // Priority scoring: higher score = safer to remove
+            // Never remove if it would isolate a node (return -1)
+            if (sourceEdgeCount <= 1 || targetParentCount <= 1)
+                return -1;
+
+            // Prefer removing edges from nodes with more connections
+            // This maintains better connectivity overall
+            int priority = (sourceEdgeCount - 1) * 10 + (targetParentCount - 1) * 10;
+
+            // Add small random factor to break ties consistently
+            // Use a seeded random for deterministic behavior if needed
+            priority += UnityEngine.Random.Range(0, 3);
+
+            return priority;
+        }
+
+        private static List<List<MapRoomNode>> RemovePathRandomly(List<List<MapRoomNode>> nodes, MapNodeConfiguration config)
+        {
+            for (int rowIndex = 0; rowIndex < nodes.Count - 1; rowIndex++)
+            {
+                var currentRow = nodes[rowIndex];
+                var nextRow = nodes[rowIndex + 1];
+
+                for (int i = 0; i < currentRow.Count; i++)
+                {
+                    var currentNode = currentRow[i];
+
+                    // Only consider nodes with more than one connection
+                    if (currentNode.Edges.Count > 1)
+                    {
+                        // Create a copy of the edges list to safely iterate and modify
+                        var edgesToConsider = new List<MapEdge>(currentNode.Edges);
+
+                        foreach (var edge in edgesToConsider)
+                        {
+                            //Debug.Log($"{edge.SrcRow} {edge.SrcColumn} has {currentNode.Edges.Count}");
+
+                            // Get the target node this edge connects to
+                            var targetNode = nextRow[edge.DstColumn];
+
+                            // Check if the target node has more than one parent
+                            if (targetNode.Parents.Count > 1 && currentNode.Edges.Count > 1)
+                            {
+                                // Random chance to remove this connection
+                                float randomChance = UnityEngine.Random.Range(0f, 1f);
+
+                                if (randomChance < config.PathRemovalChance)
+                                {
+                                    //// Remove the edge from current node
+                                    currentNode.Edges.Remove(edge);
+
+                                    // Remove the corresponding parent reference from target node
+                                    var parentPoint = new Point(i, rowIndex);
+                                    targetNode.Parents.RemoveAll(p => p.X == parentPoint.X && p.Y == parentPoint.Y);
+                                    ;
+                                }
+                                //else
+                                //{
+                                //    Debug.Log($"Fail at {randomChance}");
+                                //}
+                            }
+                            //else
+                            //{
+                            //    Debug.Log($"Fail because {edge.SrcRow} {edge.SrcColumn} has {currentNode.Edges.Count} and " +
+                            //        $" {edge.DstRow} {edge.DstColumn} has {targetNode.Parents.Count}");
+                            //}
+                        }
+                    }
+                }
+            }
+
+            return nodes;
+        }
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <footer class="mt-5">
+            <div class="text-center text-lg text-gold pb-5">
+                ©2026 Aik Chun.<br> All rights reserverd.
+            </div>
+        </footer>
+
+    </main>
+
+</body>
+
+</html>
