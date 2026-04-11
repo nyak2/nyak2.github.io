@@ -93,67 +93,64 @@
             </div>
         </section>
 
-        <section class="flex flex-col bg-darkGreen py-10">
-            <div class="p-5 justify-center items-center">
-                <h2 class="text-4xl lg:text-5xl text-gold text-center">Contributed Works</h2>
+        <section class="workItem-section">
+            <div class="py-10 justify-center items-center">
+                <h2 class="workItem-Title">Contributed Works</h2>
             </div>
 
-            <div class="default-margin flex flex-col gap-12 p-5">
+            <div class="default-margin flex flex-col gap-15 lg:gap-25 mb-10">
                 <!-- Work Item 1 -->
-                <div class="work-item bg-darkGreen border border-gold rounded-lg overflow-hidden">
+                <div class="workItem-content">
                     <!-- Hero Gallery (Full Width) -->
-                    <div class="gallery-container w-full">
-                        <div class="gallery-main relative w-full h-64 md:h-96 lg:h-100">
-                            <img src="/assets/placeholder.webp" alt="Gallery item"
-                                class="gallery-image w-full h-full object-cover lg:object-contain">
+                    <div class="workItem-gallery-container">
+                        <div class="workItem-gallery-main">
+                            <img src="/assets/placeholder.webp" alt="Gallery item" class="workItem-gallery-image">
 
                             <!-- Navigation Arrows -->
-                            <button
-                                class="gallery-prev absolute left-3 top-1/2 transform -translate-y-1/2 bg-gold bg-opacity-80 hover:bg-opacity-100 text-black w-10 h-10 rounded-full flex items-center justify-center transition z-10">
-                                <i class="fi fi-rr-angle-left"></i>
+                            <button class="workItem-gallery-prev">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-left"></i>
+                                </div>
                             </button>
-                            <button
-                                class="gallery-next absolute right-3 top-1/2 transform -translate-y-1/2 bg-gold bg-opacity-80 hover:bg-opacity-100 text-black w-10 h-10 rounded-full flex items-center justify-center transition z-10">
-                                <i class="fi fi-rr-angle-right"></i>
+                            <button class="workItem-gallery-next">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-right"></i>
+                                </div>
                             </button>
 
                             <!-- Counter -->
-                            <div
-                                class="absolute bottom-3 right-3 bg-black bg-opacity-70 px-3 py-1 rounded text-gold text-sm font-semibold">
+                            <div class="workItem-gallery-counter">
                                 <span class="current-index">1</span> / <span class="total-images">3</span>
                             </div>
                         </div>
 
                         <!-- Thumbnail Navigation -->
-                        <div class="gallery-thumbnails flex gap-2 p-4 overflow-x-auto bg-black">
-                            <img src="/assets/placeholder.webp" alt="Thumb"
-                                class="gallery-thumb w-20 h-20 object-cover rounded cursor-pointer opacity-60 hover:opacity-100 transition border-2 border-transparent hover:border-gold shrink-0">
-                            <img src="/assets/placeholder.webp" alt="Thumb"
-                                class="gallery-thumb w-20 h-20 object-cover rounded cursor-pointer opacity-60 hover:opacity-100 transition border-2 border-transparent hover:border-gold shrink-0">
-                            <img src="/assets/placeholder.webp" alt="Thumb"
-                                class="gallery-thumb w-20 h-20 object-cover rounded cursor-pointer opacity-60 hover:opacity-100 transition border-2 border-transparent hover:border-gold shrink-0">
+                        <div class="workItem-gallery-thumbnails">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
                         </div>
                     </div>
 
                     <!-- Title and Description Section -->
-                    <div class="p-6 border-b border-gold bg-darkGreen">
-                        <h3 class="text-2xl lg:text-3xl font-bold text-gold mb-2">Node Map Generator</h3>
-                        <p class="text-white text-md lg:text-lg leading-relaxed">
+                    <div class="workItem-details-section">
+                        <h3 class="workItem-details-title">Node Map Generator</h3>
+                        <p class="workItem-details-description">
                             Generates a procedural node-based map with dynamic paths, room diversity and configurable
                             connectivity rules.
                         </p>
                     </div>
 
                     <!-- Code Snippet Section -->
-                    <div class="p-6 flex flex-col">
-                        <div class="flex flex-row mb-3">
-                            <h4 class="text-2xl lg:text-3xl font-bold text-gold">Code Snippet</h4>
+                    <div class="workItem-code-section">
+                        <div class="workItem-code-header">
+                            <h4 class="workItem-code-Title">Code Snippet</h4>
                             <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
-                                class="px-4 py-2 ml-auto bg-gold text-black rounded font-semibold text-center hover:bg-opacity-80 transition">
+                                class="workItem-code-link">
                                 View Full Code
                             </a>
                         </div>
-                        <div class="code-viewer bg-black rounded-lg p-4 overflow-auto border border-gold">
+                        <div class="workItem-code-viewer">
                             <pre class="line-numbers"><code class="language-csharp">public static List<List<MapRoomNode>> GenerateNodeMap(MapNodeConfiguration config)
 {
     var columnCounts = new List<int>();
@@ -175,9 +172,226 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                <!-- Work Item 2 -->
+                <div class="workItem-content">
+                    <!-- Hero Gallery (Full Width) -->
+                    <div class="workItem-gallery-container">
+                        <div class="workItem-gallery-main">
+                            <img src="/assets/placeholder.webp" alt="Gallery item" class="workItem-gallery-image">
 
-            <!-- You can duplicate the work-item div above for additional contributions -->
+                            <!-- Navigation Arrows -->
+                            <button class="workItem-gallery-prev">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-left"></i>
+                                </div>
+                            </button>
+                            <button class="workItem-gallery-next">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-right"></i>
+                                </div>
+                            </button>
+
+                            <!-- Counter -->
+                            <div class="workItem-gallery-counter">
+                                <span class="current-index">1</span> / <span class="total-images">3</span>
+                            </div>
+                        </div>
+
+                        <!-- Thumbnail Navigation -->
+                        <div class="workItem-gallery-thumbnails">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                        </div>
+                    </div>
+
+                    <!-- Title and Description Section -->
+                    <div class="workItem-details-section">
+                        <h3 class="workItem-details-title">Node Map Generator</h3>
+                        <p class="workItem-details-description">
+                            Generates a procedural node-based map with dynamic paths, room diversity and configurable
+                            connectivity rules.
+                        </p>
+                    </div>
+
+                    <!-- Code Snippet Section -->
+                    <div class="workItem-code-section">
+                        <div class="workItem-code-header">
+                            <h4 class="workItem-code-Title">Code Snippet</h4>
+                            <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
+                                class="workItem-code-link">
+                                View Full Code
+                            </a>
+                        </div>
+                        <div class="workItem-code-viewer">
+                            <pre class="line-numbers"><code class="language-csharp">public static List<List<MapRoomNode>> GenerateNodeMap(MapNodeConfiguration config)
+{
+    var columnCounts = new List<int>();
+    foreach (var mapColumn in config.NodeMap)
+    {
+        columnCounts.Add(mapColumn.column);
+    }
+
+    ResetShopTracking(config);
+
+    var map = CreateNodes(config.NodeMap.Count, columnCounts, config);
+    map = CreatePaths(map);
+    map = CleanUpPaths(map);
+    map = RemovePathRandomly(map, config);
+
+    return map;
+}
+</code></pre>
+                        </div>
+                    </div>
+                </div>
+                <!-- Work Item 3 -->
+                <div class="workItem-content">
+                    <!-- Hero Gallery (Full Width) -->
+                    <div class="workItem-gallery-container">
+                        <div class="workItem-gallery-main">
+                            <img src="/assets/placeholder.webp" alt="Gallery item" class="workItem-gallery-image">
+
+                            <!-- Navigation Arrows -->
+                            <button class="workItem-gallery-prev">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-left"></i>
+                                </div>
+                            </button>
+                            <button class="workItem-gallery-next">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-right"></i>
+                                </div>
+                            </button>
+
+                            <!-- Counter -->
+                            <div class="workItem-gallery-counter">
+                                <span class="current-index">1</span> / <span class="total-images">3</span>
+                            </div>
+                        </div>
+
+                        <!-- Thumbnail Navigation -->
+                        <div class="workItem-gallery-thumbnails">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                        </div>
+                    </div>
+
+                    <!-- Title and Description Section -->
+                    <div class="workItem-details-section">
+                        <h3 class="workItem-details-title">Node Map Generator</h3>
+                        <p class="workItem-details-description">
+                            Generates a procedural node-based map with dynamic paths, room diversity and configurable
+                            connectivity rules.
+                        </p>
+                    </div>
+
+                    <!-- Code Snippet Section -->
+                    <div class="workItem-code-section">
+                        <div class="workItem-code-header">
+                            <h4 class="workItem-code-Title">Code Snippet</h4>
+                            <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
+                                class="workItem-code-link">
+                                View Full Code
+                            </a>
+                        </div>
+                        <div class="workItem-code-viewer">
+                            <pre class="line-numbers"><code class="language-csharp">public static List<List<MapRoomNode>> GenerateNodeMap(MapNodeConfiguration config)
+{
+    var columnCounts = new List<int>();
+    foreach (var mapColumn in config.NodeMap)
+    {
+        columnCounts.Add(mapColumn.column);
+    }
+
+    ResetShopTracking(config);
+
+    var map = CreateNodes(config.NodeMap.Count, columnCounts, config);
+    map = CreatePaths(map);
+    map = CleanUpPaths(map);
+    map = RemovePathRandomly(map, config);
+
+    return map;
+}
+</code></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Work Item 4 -->
+                <div class="workItem-content">
+                    <!-- Hero Gallery (Full Width) -->
+                    <div class="workItem-gallery-container">
+                        <div class="workItem-gallery-main">
+                            <img src="/assets/placeholder.webp" alt="Gallery item" class="workItem-gallery-image">
+
+                            <!-- Navigation Arrows -->
+                            <button class="workItem-gallery-prev">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-left"></i>
+                                </div>
+                            </button>
+                            <button class="workItem-gallery-next">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-right"></i>
+                                </div>
+                            </button>
+
+                            <!-- Counter -->
+                            <div class="workItem-gallery-counter">
+                                <span class="current-index">1</span> / <span class="total-images">3</span>
+                            </div>
+                        </div>
+
+                        <!-- Thumbnail Navigation -->
+                        <div class="workItem-gallery-thumbnails">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                        </div>
+                    </div>
+
+                    <!-- Title and Description Section -->
+                    <div class="workItem-details-section">
+                        <h3 class="workItem-details-title">Node Map Generator</h3>
+                        <p class="workItem-details-description">
+                            Generates a procedural node-based map with dynamic paths, room diversity and configurable
+                            connectivity rules.
+                        </p>
+                    </div>
+
+                    <!-- Code Snippet Section -->
+                    <div class="workItem-code-section">
+                        <div class="workItem-code-header">
+                            <h4 class="workItem-code-Title">Code Snippet</h4>
+                            <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
+                                class="workItem-code-link">
+                                View Full Code
+                            </a>
+                        </div>
+                        <div class="workItem-code-viewer">
+                            <pre class="line-numbers"><code class="language-csharp">public static List<List<MapRoomNode>> GenerateNodeMap(MapNodeConfiguration config)
+{
+    var columnCounts = new List<int>();
+    foreach (var mapColumn in config.NodeMap)
+    {
+        columnCounts.Add(mapColumn.column);
+    }
+
+    ResetShopTracking(config);
+
+    var map = CreateNodes(config.NodeMap.Count, columnCounts, config);
+    map = CreatePaths(map);
+    map = CleanUpPaths(map);
+    map = RemovePathRandomly(map, config);
+
+    return map;
+}
+</code></pre>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </section>
@@ -223,11 +437,11 @@
     <!-- Gallery Carousel Functionality -->
     <script>
         function initializeGalleries() {
-            document.querySelectorAll(".gallery-container").forEach((gallery) => {
-                const images = gallery.querySelectorAll(".gallery-thumb");
-                const mainImage = gallery.querySelector(".gallery-image");
-                const prevBtn = gallery.querySelector(".gallery-prev");
-                const nextBtn = gallery.querySelector(".gallery-next");
+            document.querySelectorAll(".workItem-gallery-container").forEach((gallery) => {
+                const images = gallery.querySelectorAll(".workItem-gallery-thumb");
+                const mainImage = gallery.querySelector(".workItem-gallery-image");
+                const prevBtn = gallery.querySelector(".workItem-gallery-prev");
+                const nextBtn = gallery.querySelector(".workItem-gallery-next");
                 const currentIndexSpan = gallery.querySelector(".current-index");
                 const totalImagesSpan = gallery.querySelector(".total-images");
 
