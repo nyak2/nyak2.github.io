@@ -249,7 +249,7 @@ body {
     }
 
     .workItem-details-description {
-        @apply text-white text-base lg:text-lg leading-relaxed mb-6 lg:mb-2;
+        @apply text-white text-lg lg:text-xl leading-relaxed mb-6 lg:mb-2;
     }
 
     .workItem-details-header {

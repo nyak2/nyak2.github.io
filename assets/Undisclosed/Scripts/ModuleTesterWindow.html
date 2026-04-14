@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModuleTesterWindow.cs</title>
+
+    <!-- Tailwind CSS -->
+    <link href="../../../main.css" rel="stylesheet">
+
+    <!-- Prism -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-csharp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+</head>
+
+<body>
+    <main>
+        <section class="flex flex-col bg-darkGreen py-10 ">
+            <div class="flex flex-col gap-5 lg:gap-10 lg:mx-50">
+                <h2 class="text-gold text-3xl lg:text-4xl text-center underline"> ModuleTesterWindow.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers lg:border-2 border-gold lg:rounded-2xl text-white font-mono"><code class="language-csharp">using UnityEngine;
+using System.Collections.Generic;
+using Game;
+
+#if UNITY_EDITOR
+
+using Sirenix.OdinInspector.Editor;
+using Sirenix.OdinInspector;
+using UnityEditor;
+
+#endif
+
+namespace Gameplay
+{
+#if UNITY_EDITOR
+
+    ///ModuleTesterWindow is a editor tool that allows modules to be added during runtime. 
+    //This is for mostly used for anyone who wants to test if the modules are working without having to reach the end of the level and select a module
+
+    public class ModuleTesterWindow : OdinEditorWindow
+    {
+        [MenuItem("ChaosNut/Module Tester")]
+        private static void OpenWindow()
+        {
+            var window = GetWindow<ModuleTesterWindow>();
+            window.titleContent = new GUIContent("Module Tester");
+            window.Show();
+        }
+
+        [TitleGroup("ModuleTesterWindow", "A tool that allows modules to be added during runtime to test specific modules.", TitleAlignments.Centered)]
+        [TabGroup("ModuleTesterWindow/Tabs", "Module Testing")]
+
+        // Main horizontal layout - Left and Right columns
+        [HorizontalGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout",0.4f)]
+        // Right column - Module Selection
+        [VerticalGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout/Right")]
+        [BoxGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout/Right/Module Selection")]
+        [ShowInInspector]
+        [OnValueChanged("ResetSelectedModule")]
+        [ValueDropdown("GetAvailableModuleRarities")]
+        [InfoBox("Select the rarity, the module you want to add and then press \"Add Selected Module\" to add it")]
+        [LabelText("Rarity")] private ModuleRarity _selectedRarity = ModuleRarity.COMMON;
+
+        [BoxGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout/Right/Module Selection")]
+        [ShowInInspector]
+        [ValueDropdown("GetAvailableModules")]
+        [LabelText("Modules")] private IModuleChip _selectedModule;
+
+        [BoxGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout/Right/Module Selection")]
+        [Button("Add Selected Module", ButtonSizes.Large)]
+        [GUIColor(0.98f, 0.54f, 0.33f)]
+        private void AddSelectedModule()
+        {
+            if (!Application.isPlaying)
+            {
+                Debug.LogError("Cannot add modules when not playing!");
+                return;
+            }
+
+            if (_currentSession == null)
+            {
+                RefreshSessionData();
+                if (_currentSession == null)
+                {
+                    Debug.LogError("No rogue session available!");
+                    return;
+                }
+            }
+
+            if (_selectedModule == null)
+            {
+                Debug.LogError("No module selected!");
+                return;
+            }
+
+            _selectedModule.Apply(_selectedRarity, _currentSession);
+
+            Debug.Log($"Added module: {_selectedModule.Name} ({_selectedRarity})");
+        }
+
+        [InfoBox("Adds a random module")]
+        [BoxGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout/Right/Quick Actions")]
+        [Button("Add Random Common", ButtonSizes.Large)]
+        [GUIColor(0.34f, 0.83f, 0.98f)]
+        private void AddRandomCommon()
+        {
+            AddRandomModuleOfRarity(ModuleRarity.COMMON);
+        }
+
+        [BoxGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout/Right/Quick Actions")]
+        [Button("Add Random Rare", ButtonSizes.Large)]
+        [GUIColor(0.93f, 0.18f, 0.14f)]
+        private void AddRandomRare()
+        {
+            AddRandomModuleOfRarity(ModuleRarity.RARE);
+        }
+
+        [BoxGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout/Right/Quick Actions")]
+        [Button("Add Random Epic", ButtonSizes.Large)]
+        [GUIColor(0.60f, 0.27f, 0.83f)]
+        private void AddRandomEpic()
+        {
+            AddRandomModuleOfRarity(ModuleRarity.EPIC);
+        }
+
+        [BoxGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout/Right/Quick Actions")]
+        [Button("Add Random Legendary", ButtonSizes.Large)]
+        [GUIColor(0.95f, 0.60f, 0.22f)]
+        private void AddRandomLegendary()
+        {
+            AddRandomModuleOfRarity(ModuleRarity.LEGENDARY);
+        }
+
+        // Debug Info Tab
+        [TabGroup("ModuleTesterWindow/Tabs", "Debug Info")]
+        [BoxGroup("ModuleTesterWindow/Tabs/Debug Info/Current Session")]
+        [ShowInInspector, ReadOnly]
+        [DisplayAsString]
+        private string SessionInfo
+        {
+            get
+            {
+                if (_currentSession == null)
+                    return "No session data available";
+
+                return $"Session Active: {_currentSession != null}\n" +
+                       $"Module Database: {_currentSession?.ModuleDatabase != null}\n" +
+                       $"Module Queue: {_currentSession?.ModuleQueue != null}";
+            }
+        }
+
+        //Left Column
+        [VerticalGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout/Left")]
+        [BoxGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout/Left/Session Data")]
+        [ShowInInspector, ReadOnly]
+        private ISessionRogue _currentSession;
+
+        [BoxGroup("ModuleTesterWindow/Tabs/Module Testing/MainLayout/Left/Session Data")]
+        [Button("Refresh Session Data")]
+        private void RefreshSessionData()
+        {
+            if (Application.isPlaying)
+            {
+                _currentSession = SessionData.CurrentRogue;
+                if (_currentSession == null)
+                {
+                    Debug.LogWarning("No current rogue session found. Make sure you're in a rogue game mode.");
+                }
+            }
+            else
+            {
+                _currentSession = null;
+            }
+        }
+
+        // Helper methods
+        private void ResetSelectedModule()
+        {
+            if (_currentSession != null)
+            {
+                //set default selectedmodule to be the first module in the list based on the rarity selected
+                var modulePool = _currentSession.ModuleDatabase.GetByRarity(_selectedRarity);
+                if (modulePool?.Pool.Count > 0)
+                {
+                    _selectedModule = modulePool.Pool[0];
+                }
+                else
+                {
+                    _selectedModule = null;
+                }
+            }
+        }
+
+        private void AddRandomModuleOfRarity(ModuleRarity rarity)
+        {
+            if (!Application.isPlaying)
+            {
+                Debug.LogError("Cannot add modules when not playing!");
+                return;
+            }
+
+            if (_currentSession == null)
+            {
+                RefreshSessionData();
+                if (_currentSession == null)
+                {
+                    Debug.LogError("No rogue session available!");
+                    return;
+                }
+            }
+
+            var moduleDatabase = _currentSession.ModuleDatabase;
+            var modulePool = moduleDatabase.GetByRarity(rarity).Pool;
+            var randomIndex = Random.Range(0, modulePool.Count);
+            var randomModule = modulePool[randomIndex];
+
+            randomModule.Apply(rarity, _currentSession);
+
+            Debug.Log($"Added random {rarity} module: {randomModule.Name}");
+        }
+
+        private IEnumerable<ModuleRarity> GetAvailableModuleRarities()
+        {
+            return System.Enum.GetValues(typeof(ModuleRarity)) as ModuleRarity[];
+        }
+
+        private IEnumerable<IModuleChip> GetAvailableModules()
+        {
+            if (_currentSession?.ModuleDatabase == null)
+                return new List<IModuleChip>();
+
+            var modulePool = _currentSession.ModuleDatabase.GetByRarity(_selectedRarity);
+            return modulePool?.Pool ?? new List<IModuleChip>();
+        }
+
+        private void OnEnable()
+        {
+            RefreshSessionData();
+            EditorApplication.update += OnEditorUpdate;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+        }
+
+        private void OnDisable()
+        {
+            EditorApplication.update -= OnEditorUpdate;
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+        }
+
+        private void OnEditorUpdate()
+        {
+            if (!Application.isPlaying) return;
+
+            var currentSession = SessionData.CurrentRogue;
+            if (_currentSession != currentSession)
+            {
+                RefreshSessionData();
+                ResetSelectedModule();
+                Repaint(); // Force the window to redraw
+            }
+        }
+
+        private void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            switch (state)
+            {
+                case PlayModeStateChange.EnteredEditMode:
+                    // Reset everything when exiting play mode
+                    _currentSession = null;
+                    _selectedModule = null;
+                    Repaint(); // Update the window display
+                    break;
+            }
+        }
+    }
+#endif
+}
+</code></pre>
+            </div>
+        </section>
+
+        <footer class="mt-5">
+            <div class="text-center text-lg text-gold pb-5">
+                ©2026 Aik Chun.<br> All rights reserverd.
+            </div>
+        </footer>
+
+    </main>
+
+</body>
+
+</html>

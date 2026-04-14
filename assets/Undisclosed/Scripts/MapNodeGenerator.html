@@ -15,13 +15,36 @@
     <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-csharp.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <!-- Icons -->
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
 
 </head>
 
 <body>
+    <button id="toggleSidebar"
+        class="fixed top-1/2 -translate-y-1/2 bg-gold text-darkGreen px-2 py-6 rounded-r-lg z-50 transition-all duration-300">
+        <div id="sidebar-Icon" class="transform transition-all duration-300 mt-1">
+            <i class="fi fi-rr-angle-right text-xl"></i>
+        </div>
+    </button>
+
+    <div id="overlay" class="fixed inset-0 bg-black/50 hidden z-40"></div>
+
+    <!-- Drawer -->
+    <div id="sidebar-menu"
+        class="fixed top-0 left-0 h-full w-64 bg-darkGreen border-r-3 border-r-gold text-white transform -translate-x-full transition-transform duration-300 z-50 flex flex-col p-5">
+
+        <h2 class="text-gold text-xl mb-5 border-b-2 border-b-gold">Scripts</h2>
+
+        <a href="#" class="mb-3 hover:text-gold">Home</a>
+        <a href="#" class="mb-3 hover:text-gold">Projects</a>
+        <a href="#" class="mb-3 hover:text-gold">Contact</a>
+    </div>
     <main>
         <section class="flex flex-col bg-darkGreen py-10 ">
-            <div class="flex flex-col gap-5 lg:gap-10 lg:mx-50">
+            <div class="flex flex-col gap-5 lg:gap-10 lg:mx-40">
                 <h2 class="text-gold text-3xl lg:text-4xl text-center underline"> MapNodeGenerator.cs</h2>
                 <!-- Code Snippet Section -->
                 <pre class="line-numbers lg:border-2 border-gold lg:rounded-2xl text-white font-mono"><code class="language-csharp">using System.Collections.Generic;
@@ -568,5 +591,55 @@ namespace Gameplay
     </main>
 
 </body>
+<script>
+    const sidebar = document.getElementById("sidebar-menu");
+    const toggleBtn = document.getElementById("toggleSidebar");
+    const sidebarIcon = document.getElementById("sidebar-Icon");
+    const overlay = document.getElementById("overlay");
+    document.documentElement.style.setProperty(
+        "--sidebar-width",
+        sidebar.offsetWidth + "px"
+    );
+
+    let isOpen = false;
+
+    toggleBtn.addEventListener("click", () => {
+        isOpen = !isOpen;
+
+        if (isOpen) {
+            sidebar.classList.remove("-translate-x-full");
+            overlay.classList.remove("hidden");
+
+            toggleBtn.style.transform = "translateX(var(--sidebar-width))";
+            sidebarIcon.classList.add("rotate-180");
+            sidebarIcon.classList.remove("mt-1");
+            sidebarIcon.classList.add("mb-1");
+
+        } else {
+            sidebar.classList.add("-translate-x-full");
+            overlay.classList.add("hidden");
+
+            // 👉 Move button back
+
+            toggleBtn.style.transform = "translateX(0px)";
+            sidebarIcon.classList.remove("rotate-180");
+            sidebarIcon.classList.add("mt-1");
+            sidebarIcon.classList.remove("mb-1");
+        }
+    });
+
+    // Click outside closes drawer
+    overlay.addEventListener("click", () => {
+        sidebar.classList.add("-translate-x-full");
+        overlay.classList.add("hidden");
+
+        sidebarIcon.classList.remove("rotate-180");
+        sidebarIcon.classList.add("mt-1");
+        sidebarIcon.classList.remove("mb-1");
+        toggleBtn.style.transform = "translateX(0px)";
+
+        isOpen = false;
+    });
+</script>
 
 </html>

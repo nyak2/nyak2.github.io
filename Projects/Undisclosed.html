@@ -9,6 +9,77 @@
     <!-- Tailwind CSS -->
     <link href="../main.css" rel="stylesheet">
 
+    <style>
+        .image-focus-overlay {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(7, 7, 7, 0.82);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 180ms ease;
+            z-index: 50;
+        }
+
+        .image-focus-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .image-focus-content {
+            position: relative;
+            max-width: 92vw;
+            max-height: 92vh;
+            width: min(1100px, 90vw);
+            padding: 1rem;
+            border-radius: 1rem;
+            background: rgba(10, 10, 10, 0.92);
+            box-shadow: 0 0 120px rgba(0, 0, 0, 0.45);
+        }
+
+        .image-focus-img {
+            display: block;
+            width: 100%;
+            max-height: 82vh;
+            object-fit: contain;
+            border-radius: 0.75rem;
+        }
+
+        .image-focus-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.35);
+            cursor: pointer;
+            font-size: 1.25rem;
+            transition: background 150ms ease, transform 150ms ease;
+        }
+
+        .image-focus-close:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: scale(1.05);
+        }
+
+        .workItem-gallery-image {
+            cursor: zoom-in;
+            transition: transform 180ms ease;
+        }
+
+        .workItem-gallery-image:hover {
+            transform: scale(1.01);
+        }
+    </style>
+
     <!-- Icons -->
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
@@ -135,7 +206,7 @@
                     <!-- Title and Description Section -->
                     <div class="workItem-details-section">
                         <div class="workItem-details-header">
-                            <h3 class="workItem-details-title">Node Map Generator</h3>
+                            <h3 class="workItem-details-title">Map Node Generator</h3>
                             <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
                                 class="workItem-code-link">
                                 View Full Code
@@ -189,73 +260,21 @@
                     <div class="workItem-details-section">
                         <div class="workItem-details-header">
                             <h3 class="workItem-details-title">Module Tester Tool</h3>
-                            <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
+                            <a href="/assets/Undisclosed/Scripts/ModuleTesterWindow.html" target="_blank"
                                 class="workItem-code-link">
                                 View Full Code
                             </a>
                         </div>
                         <p class="workItem-details-description">
-
+                            Editor tool that allows debuging and testing of modules during runtime without extensive gameplay.
+                            Mostly used for balancing and debugging new/reworked modules.
                         </p>
-                        <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
+                        <a href="/assets/Undisclosed/Scripts/ModuleTesterWindow.html" target="_blank"
                             class="workItem-code-link-mobile">
                             View Full Code
                         </a>
                     </div>
                 </div>
-
-                <!-- Work Item 3 -->
-                <div class="workItem-content">
-                    <!-- Hero Gallery (Full Width) -->
-                    <div class="workItem-gallery-container">
-                        <div class="workItem-gallery-main">
-                            <img src="/assets/placeholder.webp" alt="Gallery item" class="workItem-gallery-image">
-
-                            <!-- Navigation Arrows -->
-                            <button class="workItem-gallery-prev">
-                                <div class="mt-1">
-                                    <i class="fi fi-rr-angle-left"></i>
-                                </div>
-                            </button>
-                            <button class="workItem-gallery-next">
-                                <div class="mt-1">
-                                    <i class="fi fi-rr-angle-right"></i>
-                                </div>
-                            </button>
-
-                            <!-- Counter -->
-                            <div class="workItem-gallery-counter">
-                                <span class="current-index">1</span> / <span class="total-images">3</span>
-                            </div>
-                        </div>
-
-                        <!-- Thumbnail Navigation -->
-                        <div class="workItem-gallery-thumbnails">
-                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
-                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
-                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
-                        </div>
-                    </div>
-
-                    <!-- Title and Description Section -->
-                    <div class="workItem-details-section">
-                        <div class="workItem-details-header">
-                            <h3 class="workItem-details-title">Speed-based spawning system</h3>
-                            <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
-                                class="workItem-code-link">
-                                View Full Code
-                            </a>
-                        </div>
-                        <p class="workItem-details-description">
-                        </p>
-                        <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
-                            class="workItem-code-link-mobile">
-                            View Full Code
-                        </a>
-                    </div>
-
-                </div>
-
                 <!-- Work Item 4 -->
                 <div class="workItem-content">
                     <!-- Hero Gallery (Full Width) -->
@@ -308,6 +327,58 @@
                     </div>
                 </div>
 
+                <!-- Work Item 3 -->
+                <div class="workItem-content">
+                    <!-- Hero Gallery (Full Width) -->
+                    <div class="workItem-gallery-container">
+                        <div class="workItem-gallery-main">
+                            <img src="/assets/placeholder.webp" alt="Gallery item" class="workItem-gallery-image">
+
+                            <!-- Navigation Arrows -->
+                            <button class="workItem-gallery-prev">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-left"></i>
+                                </div>
+                            </button>
+                            <button class="workItem-gallery-next">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-right"></i>
+                                </div>
+                            </button>
+
+                            <!-- Counter -->
+                            <div class="workItem-gallery-counter">
+                                <span class="current-index">1</span> / <span class="total-images">3</span>
+                            </div>
+                        </div>
+
+                        <!-- Thumbnail Navigation -->
+                        <div class="workItem-gallery-thumbnails">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                            <img src="/assets/placeholder.webp" alt="Thumb" class="workItem-gallery-thumb">
+                        </div>
+                    </div>
+
+                    <!-- Title and Description Section -->
+                    <div class="workItem-details-section">
+                        <div class="workItem-details-header">
+                            <h3 class="workItem-details-title">Enemy class</h3>
+                            <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
+                                class="workItem-code-link">
+                                View Full Code
+                            </a>
+                        </div>
+                        <p class="workItem-details-description">
+                        </p>
+                        <a href="/assets/Undisclosed/Scripts/MapNodeGenerator.html" target="_blank"
+                            class="workItem-code-link-mobile">
+                            View Full Code
+                        </a>
+                    </div>
+
+                </div>
+
             </div>
         </section>
 
@@ -318,6 +389,13 @@
         </footer>
 
     </main>
+
+    <div id="image-focus-overlay" class="image-focus-overlay" aria-hidden="true">
+        <div class="image-focus-content" role="dialog" aria-modal="true">
+            <button class="image-focus-close" aria-label="Close focused image">×</button>
+            <img src="" alt="Focused gallery image" class="image-focus-img">
+        </div>
+    </div>
 
     <!-- Toggle mobile menu -->
     <script>
@@ -408,6 +486,41 @@
         } else {
             initializeGalleries();
         }
+
+        const focusOverlay = document.getElementById("image-focus-overlay");
+        const focusImage = focusOverlay.querySelector(".image-focus-img");
+        const closeFocusBtn = focusOverlay.querySelector(".image-focus-close");
+
+        const openImageFocus = (image) => {
+            focusImage.src = image.src;
+            focusImage.alt = image.alt || "Focused gallery image";
+            focusOverlay.classList.add("open");
+            document.body.style.overflow = "hidden";
+            focusOverlay.setAttribute("aria-hidden", "false");
+        };
+
+        const closeImageFocus = () => {
+            focusOverlay.classList.remove("open");
+            document.body.style.overflow = "";
+            focusOverlay.setAttribute("aria-hidden", "true");
+        };
+
+        document.querySelectorAll(".workItem-gallery-image").forEach((image) => {
+            image.addEventListener("click", () => openImageFocus(image));
+        });
+
+        closeFocusBtn.addEventListener("click", closeImageFocus);
+        focusOverlay.addEventListener("click", (event) => {
+            if (event.target === focusOverlay) {
+                closeImageFocus();
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && focusOverlay.classList.contains("open")) {
+                closeImageFocus();
+            }
+        });
     </script>
 
     <!-- Toggle black background on scroll -->
