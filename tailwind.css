@@ -262,7 +262,7 @@ body {
     .workItem-image-focus-image {
         @apply block object-contain w-full h-auto rounded;
     }
-    
+
     .workItem-details-section {
         @apply flex flex-col p-6 border-b border-gold bg-darkGreen;
     }
