@@ -9,77 +9,6 @@
     <!-- Tailwind CSS -->
     <link href="../main.css" rel="stylesheet">
 
-    <style>
-        .image-focus-overlay {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(7, 7, 7, 0.82);
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 180ms ease;
-            z-index: 50;
-        }
-
-        .image-focus-overlay.open {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .image-focus-content {
-            position: relative;
-            max-width: 92vw;
-            max-height: 92vh;
-            width: min(1100px, 90vw);
-            padding: 1rem;
-            border-radius: 1rem;
-            background: rgba(10, 10, 10, 0.92);
-            box-shadow: 0 0 120px rgba(0, 0, 0, 0.45);
-        }
-
-        .image-focus-img {
-            display: block;
-            width: 100%;
-            max-height: 82vh;
-            object-fit: contain;
-            border-radius: 0.75rem;
-        }
-
-        .image-focus-close {
-            position: absolute;
-            top: 0.75rem;
-            right: 0.75rem;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 2.5rem;
-            height: 2.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 9999px;
-            color: #fff;
-            background: rgba(0, 0, 0, 0.35);
-            cursor: pointer;
-            font-size: 1.25rem;
-            transition: background 150ms ease, transform 150ms ease;
-        }
-
-        .image-focus-close:hover {
-            background: rgba(255, 255, 255, 0.12);
-            transform: scale(1.05);
-        }
-
-        .workItem-gallery-image {
-            cursor: zoom-in;
-            transition: transform 180ms ease;
-        }
-
-        .workItem-gallery-image:hover {
-            transform: scale(1.01);
-        }
-    </style>
-
     <!-- Icons -->
     <link rel='stylesheet'
         href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
@@ -389,10 +318,9 @@
 
     </main>
 
-    <div id="image-focus-overlay" class="image-focus-overlay" aria-hidden="true">
-        <div class="image-focus-content" role="dialog" aria-modal="true">
-            <button class="image-focus-close" aria-label="Close focused image">×</button>
-            <img src="" alt="Focused gallery image" class="image-focus-img">
+    <div id="workItem-image-focus-overlay" class="workItem-image-focus-overlay" >
+        <div class="workItem-image-focus-content" role="dialog" >
+            <img src="" class="workItem-image-focus-image">
         </div>
     </div>
 
@@ -468,12 +396,6 @@
                     thumb.addEventListener("click", () => updateGallery(index));
                 });
 
-                // Keyboard navigation
-                document.addEventListener("keydown", (e) => {
-                    if (e.key === "ArrowLeft") updateGallery(currentIndex - 1);
-                    if (e.key === "ArrowRight") updateGallery(currentIndex + 1);
-                });
-
                 // Initialize first image
                 updateGallery(0);
             });
@@ -486,29 +408,25 @@
             initializeGalleries();
         }
 
-        const focusOverlay = document.getElementById("image-focus-overlay");
-        const focusImage = focusOverlay.querySelector(".image-focus-img");
-        const closeFocusBtn = focusOverlay.querySelector(".image-focus-close");
+        const focusOverlay = document.getElementById("workItem-image-focus-overlay");
+        const focusImage = focusOverlay.querySelector(".workItem-image-focus-image");
+        const closeFocusBtn = focusOverlay.querySelector(".workItem-image-focus-close");
 
         const openImageFocus = (image) => {
             focusImage.src = image.src;
-            focusImage.alt = image.alt || "Focused gallery image";
             focusOverlay.classList.add("open");
             document.body.style.overflow = "hidden";
-            focusOverlay.setAttribute("aria-hidden", "false");
         };
 
         const closeImageFocus = () => {
             focusOverlay.classList.remove("open");
             document.body.style.overflow = "";
-            focusOverlay.setAttribute("aria-hidden", "true");
         };
 
         document.querySelectorAll(".workItem-gallery-image").forEach((image) => {
             image.addEventListener("click", () => openImageFocus(image));
         });
 
-        closeFocusBtn.addEventListener("click", closeImageFocus);
         focusOverlay.addEventListener("click", (event) => {
             if (event.target === focusOverlay) {
                 closeImageFocus();
