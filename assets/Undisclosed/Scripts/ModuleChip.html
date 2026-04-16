@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IModuleChip.cs | AC Portfolio</title>
+
+    <!-- Tailwind CSS -->
+    <link href="../../../main.css" rel="stylesheet">
+
+    <!-- Prism -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-csharp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <!-- Icons -->
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
+
+</head>
+
+<body class="min-h-screen">
+    <button id="toggle-sidebar" class="code-sidebar-toggle">
+        <div id="sidebar-icon" class="code-sidebar-icon">
+            <i class="fi fi-rr-angle-right text-xl"></i>
+        </div>
+    </button>
+
+    <div id="overlay" class="code-sidebar-overlay closed"></div>
+
+    <!-- Drawer -->
+    <div id="sidebar-menu" class="code-sidebar closed">
+        <h2 class="code-sidebar-title">Scripts</h2>
+        
+        <button onclick="showSection('code-1')" class="code-sidebar-link">IModuleChip.cs</button>
+        <button onclick="showSection('code-2')" class="code-sidebar-link">IModuleChipStack.cs</button>
+        <button onclick="showSection('code-3')" class="code-sidebar-link">IModuleChipNonStack.cs</button>
+        <div class="code-sidebar-divider"></div>
+        <button onclick="showSection('code-4')" class="code-sidebar-link">ModuleChip.cs</button>
+        <button onclick="showSection('code-5')" class="code-sidebar-link">ModuleChipStack.cs</button>
+        <button onclick="showSection('code-6')" class="code-sidebar-link">ModuleChipNonStack.cs</button>
+        
+        <h2 class="code-sidebar-title mt-10">Examples</h2>
+        <button onclick="showSection('code-7')" class="code-sidebar-link">ModuleRienforcedBulk.cs<br>(stack)</button>
+        <button onclick="showSection('code-8')" class="code-sidebar-link">ModulePiercing.cs<br>(non-stack)</button>
+
+    </div>
+
+    <main class="grow bg-darkGreen">
+        <section id="code-1" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title">IModuleChip.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using Game;
+using Sirenix.OdinInspector;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Gameplay
+{
+    public interface IModuleChip : IRewardDropStack
+    {
+        Sprite IconSprite { get; }
+        string Name { get; }
+        string Description { get; }
+
+        float BaseWeight { get; }
+        float BonusWeight { get; set; }
+        float TotalWeight { get; }
+        float ChipEffectiveness { get; set; }
+
+        /// <summary>
+        /// CurrentLevel starts at zero to read list better but for displaying UI it will always be plus one to it 
+        /// </summary>
+        public int CurrentLevel { get; set; }
+        public List <ModuleLevel> ModuleLevels { get; }
+
+        int PriorityLevel { get; }
+
+        void Apply(ModuleRarity rarity, ISessionRogue session);
+
+        public ModuleLevel GetNextModuleLevel()
+        {
+            if(HasReachedMaxLevel())
+            {
+                return ModuleLevels[CurrentLevel];
+            }
+
+            return ModuleLevels[CurrentLevel + 1];
+        }
+
+        public ModuleLevel GetCurrentModuleLevel()
+        {
+            return ModuleLevels[CurrentLevel];
+        }
+
+        public ModuleLevel GetPreviousModuleLevel()
+        {
+            if(CurrentLevel - 1 < 0)
+            {
+                return ModuleLevels[CurrentLevel];
+            }
+
+            return ModuleLevels[CurrentLevel - 1];
+        }
+
+        public bool HasReachedMaxLevel()
+        {
+            if (CurrentLevel >= ModuleLevels.Count - 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+        [System.Serializable]
+        public class ModuleLevel
+        {
+            /// <summary>
+            /// For display only 
+            /// </summary>
+            [ReadOnly]
+            public int Level;
+
+            [Unit(Units.Percent)]
+            [MinValue(0)] public float IncreaseChance;
+            /// <summary>
+            /// StartingTier starts at zero to read list better but for displaying UI it will always be plus one to it 
+            /// </summary>
+            [MinValue(0)] public int StartingTier;
+            [MinValue(0)] public int UpgradeReqModule;
+            [MinValue(0)] public int UpgradeReqChip;
+        }
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <section id="code-2" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title">IModuleChipStack.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using System.Collections.Generic;
+using UnityEngine;
+
+namespace Gameplay
+{
+    public interface IModuleChipStack
+    {
+        public void InitializeCurrentTier(int startingTier);
+        public bool HasReachedMaxTier();
+        public void IncreaseCurrentTier();
+    }
+}
+
+</code></pre>
+            </div>
+        </section>
+
+        <section id="code-3" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title">IModuleChipNonStack.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Gameplay
+{
+    public interface IModuleChipNonStack
+    {
+
+    }
+
+}
+
+</code></pre>
+            </div>
+        </section>
+
+        <section id="code-4" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title">ModuleChip.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Game;
+using Newtonsoft.Json.Linq;
+using Sirenix.OdinInspector;
+using UnityEngine;
+
+namespace Gameplay
+{
+    public abstract class ModuleChip : SerializedScriptableObject, IModuleChip
+    {
+        [PreviewField(60, ObjectFieldAlignment.Center)]
+        [SerializeField] private Sprite _iconSprite;
+        [SerializeField] private string _name;
+        [SerializeField] private string _description;
+        [SerializeField] private float _baseWeight = 10.0f;
+        [PropertySpace(0, 10)]
+        [Tooltip("Lower number means higher priority when multiple modules share the same condition.")]
+        [SerializeField] private int _priorityLevel = 100;
+
+        [PropertyOrder(100)]
+        [TableList(AlwaysExpanded = true, HideToolbar = true)]
+        [SerializeField]
+        private List<IModuleChip.ModuleLevel> _moduleLevels = new List<IModuleChip.ModuleLevel>();
+
+        [Title("Upgrade Level Stat")]
+        [Button("Add New Entry", ButtonSizes.Medium), GUIColor(0.4f, 0.8f, 0.4f)]
+        private void AddLevels()
+        {
+            int nextLevel = _moduleLevels.Any() ? _moduleLevels.Max(s => s.Level) + 1 : 1;
+            var newEntry = new IModuleChip.ModuleLevel
+            {
+                Level = nextLevel,
+                IncreaseChance = 0,
+                StartingTier = 0,
+                UpgradeReqModule = 0
+            };
+            _moduleLevels.Add(newEntry);
+
+            //update all levels so that is in order
+            for (int i = 0; i < _moduleLevels.Count; i++)
+            {
+                _moduleLevels[i].Level = i + 1;
+            }
+        }
+        public Sprite IconSprite => _iconSprite;
+        public string Name => _name;
+        public string Description => _description;
+        public float BaseWeight => _baseWeight;
+        public float BonusWeight { get; set; }
+        public float TotalWeight => BaseWeight + BonusWeight;
+        public float ChipEffectiveness { get; set; } = 100.0f;
+
+        //CurrentLevel starts at zero to read list better but for displaying UI it will always be plus one to it 
+        public int CurrentLevel { get; set; }
+
+        public List<IModuleChip.ModuleLevel> ModuleLevels => _moduleLevels;
+
+        public int PriorityLevel => _priorityLevel;
+
+        public Sprite SpriteIcon => _iconSprite;
+        public string RewardName => _name;
+        public Color BorderColor => SessionData.CurrentRogue.ModuleDatabase.GetByName(_name).Color;
+
+        public void Apply(ModuleRarity rarity, ISessionRogue session)
+        {
+            OnApply(rarity, session);
+
+            //store the obtained module along with its rarity
+            if (!session.ObtainedModuleChips.ContainsKey(rarity))
+            {
+                session.ObtainedModuleChips.Add(rarity, new List<IModuleChip>());
+            }
+
+            session.ObtainedModuleChips[rarity].Add(this);
+
+            // Create a lookup cache to find matching module types and their priority levels from session
+            var modulePriorityLookup = session.ObtainedModuleChips.Values
+                .SelectMany(list => list)
+                .GroupBy(m => m.GetType())
+                .ToDictionary(g => g.Key, g => g.First().PriorityLevel);
+
+            // Sort modifiers by module priority level
+            foreach (var kvp in session.ModifiersByCondition)
+            {
+                kvp.Value.Sort((a, b) =>
+                {
+                    var typeA = a.GetType().DeclaringType;
+                    var typeB = b.GetType().DeclaringType;
+
+                    if (typeA == null || typeB == null)
+                        return 0;
+
+                    var hasPriorityA = modulePriorityLookup.TryGetValue(typeA, out int priorityA);
+                    var hasPriorityB = modulePriorityLookup.TryGetValue(typeB, out int priorityB);
+
+                    if (hasPriorityA && hasPriorityB)
+                        return priorityA.CompareTo(priorityB);
+
+                    return 0;
+                });
+            }
+        }
+        public abstract void OnApply(ModuleRarity rarity, ISessionRogue session);
+
+
+
+        [Title("Server Sync")]
+        [PropertyOrder(200)]
+        [InfoBox("This field is just for upload server. Actual rarity please adjust at ModuleChip Database.")]
+        [SerializeField] ModuleRarity _serverRarity = ModuleRarity.COMMON;
+
+        [PropertyOrder(200)]
+        [SerializeField]
+        [ReadOnly]
+        [LabelText("Server ID (Cached)")]
+        [InfoBox("This is the module's ID on the server. Used for updates when name changes.")]
+        private string _cachedServerId = "";
+
+        [PropertyOrder(200)]
+        [ShowInInspector]
+        [ReadOnly]
+        [LabelText("Server Status")]
+        private string _serverStatus = "Unknown";
+
+        [PropertyOrder(200)]
+        [Button("Sync to Server", ButtonSizes.Large), GUIColor(0.3f, 1f, 0.3f)]
+        private void SyncToServer()
+        {
+            if (Application.isPlaying)
+            {
+                ServerAPI.Instance.StartCoroutine(SyncModuleData());
+            }
+            else
+            {
+                Debug.LogWarning("[ModuleChip] Cannot sync in Edit mode. Enter Play mode first.");
+            }
+        }
+
+        [PropertyOrder(200)]
+        [Button("Check Server Status", ButtonSizes.Medium), GUIColor(0.9f, 0.9f, 0.3f)]
+        private void CheckServerStatus()
+        {
+            if (Application.isPlaying)
+            {
+                ServerAPI.Instance.StartCoroutine(CheckModuleOnServer());
+            }
+            else
+            {
+                Debug.LogWarning("[ModuleChip] Cannot check in Edit mode. Enter Play mode first.");
+            }
+        }
+
+        /// Get the module type (stack or non-stack)
+        protected abstract string GetModuleType();
+
+        /// POST or PATCH based on server status
+        private IEnumerator SyncModuleData()
+        {
+            Debug.Log($"[ModuleChip] Starting smart sync for: {_name}");
+            Debug.Log($"[ModuleChip] Cached Server ID: {(_cachedServerId ?? "None")}");
+
+            // Build module data JSON
+            JObject moduleData = new JObject
+            {
+                ["name"] = _name,
+                ["description"] = _description,
+                ["module_type"] = GetModuleType(),
+                ["max_level"] = _moduleLevels.Any() ? _moduleLevels.Max(m => m.Level) : 1,
+                ["rarity"] = _serverRarity.ToString(),
+                ["base_stats"] = new JObject()
+            };
+
+            Debug.Log($"[ModuleChip] Module data to sync:");
+            Debug.Log($"[ModuleChip] {moduleData.ToString(Newtonsoft.Json.Formatting.Indented)}");
+
+            bool syncComplete = false;
+            bool syncSuccess = false;
+
+            // If we have a cached server ID, try to use it directly
+            if (!string.IsNullOrEmpty(_cachedServerId))
+            {
+                Debug.Log($"[ModuleChip] Using cached server ID: {_cachedServerId}");
+
+                yield return ModuleAPI.PatchModuleById(
+                    _cachedServerId,
+                    moduleData,
+                    json =>
+                    {
+                        Debug.Log($"[ModuleChip] SUCCESS (PATCH with cached ID)");
+                        Debug.Log($"[ModuleChip] Module updated successfully: {_name}");
+                        Debug.Log($"[ModuleChip] Server response: {json.ToString(Newtonsoft.Json.Formatting.Indented)}");
+
+                        _serverStatus = "Synced";
+                        syncSuccess = true;
+                        syncComplete = true;
+
+#if UNITY_EDITOR
+                        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+                    },
+                    err =>
+                    {
+                        Debug.LogWarning($"[ModuleChip] Cached ID failed, falling back to name lookup");
+                        Debug.LogWarning($"[ModuleChip] Error: {err}");
+
+                        // Clear invalid cached ID
+                        _cachedServerId = "";
+                        syncComplete = true;
+
+#if UNITY_EDITOR
+                        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+                    }
+                );
+
+                // Wait for completion
+                while (!syncComplete)
+                {
+                    yield return null;
+                }
+
+                // If patch with cached ID succeeded, we're done
+                if (syncSuccess)
+                {
+                    Debug.Log($"[ModuleChip] Sync completed successfully for: {_name}");
+                    yield break;
+                }
+
+                // Reset for fallback attempt
+                syncComplete = false;
+            }
+
+            // No cached ID or cached ID failed - use smart sync (check by name)
+            yield return ModuleAPI.SyncModule(
+                moduleData,
+                json =>
+                {
+                    Debug.Log($"[ModuleChip] SUCCESS");
+                    Debug.Log($"[ModuleChip] Module synced successfully: {_name}");
+                    Debug.Log($"[ModuleChip] Server response: {json.ToString(Newtonsoft.Json.Formatting.Indented)}");
+
+                    // Cache the server ID
+                    if (json != null && json["id"] != null)
+                    {
+                        _cachedServerId = json["id"].ToString();
+                        Debug.Log($"[ModuleChip] Cached server ID: {_cachedServerId}");
+
+#if UNITY_EDITOR
+                        UnityEditor.EditorUtility.SetDirty(this);
+#endif
+                    }
+
+                    _serverStatus = "Synced";
+                    syncSuccess = true;
+                    syncComplete = true;
+                },
+                err =>
+                {
+                    Debug.LogError($"[ModuleChip] FAILED");
+                    Debug.LogError($"[ModuleChip] Failed to sync {_name}: {err}");
+
+                    _serverStatus = "Failed";
+                    syncComplete = true;
+                }
+            );
+
+            // Wait for completion
+            while (!syncComplete)
+            {
+                yield return null;
+            }
+
+            if (syncSuccess)
+            {
+                Debug.Log($"[ModuleChip] Sync completed successfully for: {_name}");
+            }
+            else
+            {
+                Debug.LogError($"[ModuleChip] Sync failed for: {_name}");
+            }
+        }
+
+        /// Check if this module exists on the server
+        private IEnumerator CheckModuleOnServer()
+        {
+            Debug.Log($"[ModuleChip] Checking server status for: {_name}");
+            Debug.Log($"[ModuleChip] Current cached ID: {(_cachedServerId ?? "None")}");
+
+            bool checkComplete = false;
+
+            yield return ModuleAPI.CheckModuleExists(
+                _name,
+                (exists, moduleId) =>
+                {
+                    if (exists)
+                    {
+                        Debug.Log($"[ModuleChip] Module EXISTS on server");
+                        Debug.Log($"[ModuleChip] Name: {_name}");
+                        Debug.Log($"[ModuleChip] ID: {moduleId}");
+
+                        // Update cached ID if different
+                        if (_cachedServerId != moduleId)
+                        {
+                            Debug.Log($"[ModuleChip] Updating cached ID from '{_cachedServerId}' to '{moduleId}'");
+                            _cachedServerId = moduleId;
+
+#if UNITY_EDITOR
+                            UnityEditor.EditorUtility.SetDirty(this);
+#endif
+                        }
+
+                        _serverStatus = $"Exists (ID: {moduleId.Substring(0, 8)}...)";
+                    }
+                    else
+                    {
+                        Debug.Log($"[ModuleChip] Module NOT FOUND on server");
+                        Debug.Log($"[ModuleChip] Name: {_name}");
+                        _serverStatus = "Not on server";
+
+                        // Clear cached ID if module doesn't exist
+                        if (!string.IsNullOrEmpty(_cachedServerId))
+                        {
+                            Debug.Log($"[ModuleChip] Clearing invalid cached ID");
+                            _cachedServerId = "";
+
+#if UNITY_EDITOR
+                            UnityEditor.EditorUtility.SetDirty(this);
+#endif
+                        }
+                    }
+
+                    checkComplete = true;
+                }
+            );
+
+            // Wait for completion
+            while (!checkComplete)
+            {
+                yield return null;
+            }
+        }
+    }
+
+}
+</code></pre>
+            </div>
+        </section>
+
+        <section id="code-5" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title">ModuleChipStack.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using Sirenix.OdinInspector;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace Gameplay
+{
+    public abstract class ModuleChipStack<T> : ModuleChip, IModuleChipStack where T : IModuleValueType
+    {
+        [TableList(AlwaysExpanded = true, ShowIndexLabels = true)]
+        [Title("Teir Stack Level")]
+        [SerializeField] private List<ModuleTiers> _tiers;
+        [SerializeField] private bool _canStackInfinite;
+
+        private int startingTier;
+        private int currentTier;
+
+        public void InitializeCurrentTier(int startingValue)
+        {
+            startingTier = startingValue;
+            currentTier = startingTier;
+        }
+
+        public void IncreaseCurrentTier()
+        {
+            if(!_canStackInfinite)
+            {
+                currentTier++;
+            }
+        }
+
+        public bool HasReachedMaxTier()
+        {
+            if (currentTier >= _tiers.Count - 1)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public ModuleTiers GetCurrentModuleTier()
+        {
+            return _tiers[currentTier];
+        }
+
+        [System.Serializable]
+        public class ModuleTiers
+        {
+            public T Value;
+        }
+
+        protected override string GetModuleType()
+        {
+            return "stack";
+        }
+    }
+
+}
+
+
+</code></pre>
+            </div>
+        </section>
+
+        <section id="code-6" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title">ModuleChipNonStack.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using Gameplay;
+
+public abstract class ModuleChipNonStack : ModuleChip, IModuleChipNonStack
+{
+    protected override string GetModuleType()
+    {
+        return "non-stack";
+    }
+}
+
+</code></pre>
+            </div>
+        </section>
+
+        <section id="code-7" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title">ModuleReinforcedBulk.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using Game;
+using UnityEngine;
+
+namespace Gameplay
+{
+    [CreateAssetMenu(menuName = "ChaosNut/ModuleChips/ReinforcedBulk")]
+    public class ModuleReinforcedBulk : ModuleChipStack<ModuleInteger>
+    {
+        public override void OnApply(ModuleRarity rarity, ISessionRogue session)
+        {
+            session.BonusHealth += GetCurrentModuleTier().Value.IntegerValue;
+            session.CurrentHealth += GetCurrentModuleTier().Value.IntegerValue;
+            session.CurrentHealth = Mathf.Clamp(session.CurrentHealth, 0, session.TotalHealth);
+
+            //Have it if you want it stack infinite and is the same value
+            //If uncomment it still wont work because of a boolean check inside IncreaseCurrentTier()
+            //IncreaseCurrentTier();
+        }
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <section id="code-8" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title">ModulePiercing.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using Game;
+using UnityEngine;
+
+namespace Gameplay
+{
+    [CreateAssetMenu(menuName = "ChaosNut/ModuleChips/Piercing")]
+    public class ModulePiercing : ModuleChipNonStack
+    {  
+        public override void OnApply(ModuleRarity rarity, ISessionRogue session)
+        {
+            session.BonusBulletPierceCount += 1;
+        }
+    }
+}
+</code></pre>
+            </div>
+        </section>     
+    </main>
+
+    <footer class="footer">
+        ©2026 Aik Chun.<br> All rights reserverd.
+    </footer>
+
+</body>
+
+<!-- Sidebar Menu -->
+<script>
+    const sidebar = document.getElementById("sidebar-menu");
+    const toggleBtn = document.getElementById("toggle-sidebar");
+    const sidebarIcon = document.getElementById("sidebar-icon");
+    const overlay = document.getElementById("overlay");
+    document.documentElement.style.setProperty(
+        "--sidebar-width",
+        sidebar.offsetWidth + "px"
+    );
+
+    let isOpen = false;
+
+    toggleBtn.addEventListener("click", () => {
+        isOpen = !isOpen;
+
+        if (isOpen) {
+            sidebar.classList.remove("closed");
+            sidebar.classList.add("open");
+
+            overlay.classList.remove("closed");
+
+            toggleBtn.style.transform = "translateX(var(--sidebar-width))";
+            sidebarIcon.classList.add("rotate-180", "mb-1");
+            sidebarIcon.classList.remove("mt-1");
+
+        } else {
+            sidebar.classList.remove("open");
+            sidebar.classList.add("closed");
+
+            overlay.classList.add("closed");
+
+            toggleBtn.style.transform = "translateX(0px)";
+            sidebarIcon.classList.remove("rotate-180", "mb-1");
+            sidebarIcon.classList.add("mt-1");
+        }
+    });
+
+    overlay.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    });
+
+</script>
+
+<script>
+    function showSection(id, pushHash = true) {
+        const sections = document.querySelectorAll(".code-section");
+
+        sections.forEach(section => {
+            if (section.id === id) return;
+
+            section.classList.remove("active");
+            section.classList.add("hidden");
+
+            setTimeout(() => {
+                section.classList.add("hidden");
+            }, 300);
+        });
+
+        const active = document.getElementById(id);
+        if (!active) return;
+
+        active.classList.remove("hidden");
+        active.classList.add("active");
+
+        const title = active.querySelector(".code-title")?.innerText;
+        if (title) {
+            document.title = title + " | AC Portfolio";
+        }
+
+        if (pushHash) {
+            history.pushState(null, null, "#" + id);
+        }
+
+        // Close sidebar
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    }
+
+    window.addEventListener("hashchange", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("popstate", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("load", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id);
+        }
+    });
+</script>
+
+</html>

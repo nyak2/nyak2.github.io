@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ModuleBay.cs | AC Portfolio</title>
+
+    <!-- Tailwind CSS -->
+    <link href="../../../main.css" rel="stylesheet">
+
+    <!-- Prism -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-csharp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <!-- Icons -->
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
+
+</head>
+
+<body class="min-h-screen">
+    <button id="toggle-sidebar" class="code-sidebar-toggle">
+        <div id="sidebar-icon" class="code-sidebar-icon">
+            <i class="fi fi-rr-angle-right text-xl"></i>
+        </div>
+    </button>
+
+    <div id="overlay" class="code-sidebar-overlay closed"></div>
+
+    <!-- Drawer -->
+    <div id="sidebar-menu" class="code-sidebar closed">
+        <h2 class="code-sidebar-title">Scripts</h2>
+
+        <button onclick="showSection('code-1')" class="code-sidebar-link">ModuleBay.cs</button>
+        
+    </div>
+
+    <main class="grow bg-darkGreen">
+        <section id="code-1" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title"> ModuleBay.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using System.Collections.Generic;
+using System.Linq;
+using Game;
+using Newtonsoft.Json.Linq;
+using Sirenix.OdinInspector;
+using DG.Tweening;
+using System;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
+namespace Gameplay
+{
+    public enum SortType { 
+        Rarity, 
+        Level
+    }
+    public enum ModuleBayState
+    {
+        None,
+        Equiping
+    }
+    public class ModuleBay : SerializedMonoBehaviour
+    {
+        public static ModuleBay Instance { get; private set; }
+        public bool IsInitialized { get; private set; } = false;
+
+        [Title("Runtime")]
+        [SerializeField, ReadOnly] public IBayModules _currentSelectedModule;
+
+        [Space(10)]
+        [Title("References")]
+        [SerializeField] private IModuleChipDatabase _chipDatabase;
+        [SerializeField] private BayModuleSlotData _moduleSlotData;
+        [SerializeField] private Image _cover;
+        [Space(10)]
+        [TitleGroup("Prefabs")]
+        [AssetsOnly]
+        [TabGroup("Prefabs/Bay", "BayModules")]
+        [SerializeField] private RowUI _bayModulesRowPrefab;
+        [AssetsOnly]
+        [TabGroup("Prefabs/Bay", "BayModules")]
+        [SerializeField] private BayModules _bayModules;
+        [TabGroup("Prefabs/Bay", "BayModules")]
+        [SerializeField] private Transform _bayModuleParent;
+
+        [TabGroup("Prefabs/Bay", "ModuleSlot")]
+        [SerializeField] private RowUI _moduleSlotRowPrefab;
+        [TabGroup("Prefabs/Bay", "ModuleSlot")]
+        [SerializeField] private ModuleSlot _moduleSlot;
+        [TabGroup("Prefabs/Bay", "ModuleSlot")]
+        [SerializeField] private Transform _moduleSlotParent;
+
+        private List<IBayModules> _bayModulesList = new List<IBayModules>();
+        private List<ModuleSlot> _currentEnableSlot = new List<ModuleSlot>();
+        private List<ModuleSlot> _currentDisableSlot = new List<ModuleSlot>();
+        private Dictionary<int, List<ModuleSlot>> _moduleSlots = new Dictionary<int, List<ModuleSlot>>();
+        private BayModuleSlotData bayDataClone;
+
+        public Dictionary<int, List<ModuleSlot>> ModuleSlots => _moduleSlots;
+        public List<IBayModules> BayModulesList => _bayModulesList;
+
+        public ModuleBayState ModuleBayState { get; private set; }
+
+        // Sort System
+        private SortType currentSort;
+        private bool descending;
+        private bool isAnimating;
+
+        [Space(10)]
+        [Title("Sort Button")]
+        [SerializeField] private TMP_Text _sortBtnTxt;
+        [SerializeField] private RectTransform _flipBtnRectTransform;
+
+        // Use When Equip Module
+        [Space(10)]
+        [Title("Slot In Animate")]
+        [SerializeField] public ModuleSlot _animateModule;
+
+        private void Awake()
+        {
+            Instance = this;
+        }
+
+        private void Start()
+        {
+            ModuleBayState = ModuleBayState.None;
+            //LoadInventorySlots();
+            //LoadBayModules();
+            //ModuleBaySaveSystem.LoadAssignedModules(); // Load saved modules after initialization            
+            //ModuleBayWindow.Instance.OnCloseEvent += ResetModuleBayState;
+            currentSort = SortType.Rarity;
+            descending = false;
+            isAnimating = false;
+        }
+
+        private void ResetModuleBayState()
+        {
+            _cover.gameObject.SetActive(false);
+
+            foreach (var slot in _currentEnableSlot)
+            {
+                //stop all enable slot from shaking
+                //slot.StopShakeSlot();
+
+                //disable button if there is no chip assigned
+                if (slot.Chip == null)
+                {
+                    slot.DisableSlot();
+                }
+                else
+                {
+                    slot.EnableSlot();
+                }
+            }
+
+            foreach (var disableSlot in _currentDisableSlot)
+            {
+                disableSlot.UnGrayOutSlot();
+
+                if (disableSlot.Chip == null)
+                {
+                    disableSlot.DisableSlot();
+                }
+                else
+                {
+                    disableSlot.EnableSlot();
+                }
+            }
+
+            _currentSelectedModule = null;
+            _currentEnableSlot.Clear();
+            _currentDisableSlot.Clear();
+            ModuleBayState = ModuleBayState.None;
+
+            // Auto-save after assigning
+            ModuleBaySaveSystem.SaveAssignedModules();
+        }
+
+        private void LoadInventorySlots()
+        {
+            if (bayDataClone == null)
+            {
+                bayDataClone = _moduleSlotData;
+            }
+            else
+            {
+                //Check if the inventory slots are the same if not delete the slots data in json
+                if (bayDataClone != _moduleSlotData)
+                {
+                    ModuleBaySaveSystem.DeleteAllSlotsData();
+                }
+            }
+
+            // Clear existing inventory slots
+            _moduleSlots.Clear();
+
+            // Iterate through the _configuration dictionary
+            foreach (var rowConfig in _moduleSlotData.ModuleSlots)
+            {
+                int rowIndex = rowConfig.Key;
+                BayModuleSlotData.BayModuleSlot slotConfig = rowConfig.Value;
+
+                // Check if this row already exists in the inventory
+                if (!_moduleSlots.ContainsKey(rowIndex))
+                {
+                    // Row doesn't exist, create it
+                    RowUI currentRow = Instantiate(_moduleSlotRowPrefab, _moduleSlotParent);
+                    currentRow.name = $"ModuleSlot Row {rowIndex}";
+
+                    // Create a new list for this row
+                    List<ModuleSlot> rowSlots = new List<ModuleSlot>();
+
+                    // Instantiate all slots for this new row
+                    for (int slotIndex = 0; slotIndex < slotConfig.Amount; slotIndex++)
+                    {
+                        //-----------------------------------------------------------------------------------------------------------------
+                        GameObject moduleBayContainer = new GameObject("ModuleBayContainer", typeof(RectTransform));
+                        moduleBayContainer.transform.SetParent(currentRow.transform, false);
+
+                        // Add LayoutElement
+                        UnityEngine.UI.LayoutElement layoutElement = moduleBayContainer.AddComponent<UnityEngine.UI.LayoutElement>();
+                        layoutElement.minWidth = 170f;
+                        layoutElement.minHeight = 170f;
+                        //-----------------------------------------------------------------------------------------------------------------
+
+
+                        ModuleSlot slotInstance = Instantiate(_moduleSlot, moduleBayContainer.transform);
+                        slotInstance.name = $"Slot [{rowIndex}][{slotIndex}]";
+
+                        // Set the accepted rarities for this slot
+                        if (slotIndex < slotConfig.RarityList.Count)
+                        {
+                            slotInstance.SetRaritySlot(slotConfig.RarityList[slotIndex].AcceptedRarities);
+                        }
+
+                        // Subscribe to the slot's click event
+                        slotInstance.OnClick += AssignModule;
+
+                        // Add to the row's slot list
+                        rowSlots.Add(slotInstance);
+                    }
+
+                    // Add this row to the inventory dictionary
+                    _moduleSlots.Add(rowIndex, rowSlots);
+                }
+                else
+                {
+                    // Row exists, check if we need to adjust slot count
+                    List<ModuleSlot> existingSlots = _moduleSlots[rowIndex];
+
+                    if (existingSlots.Count < slotConfig.Amount)
+                    {
+                        // Need more slots - instantiate additional ones
+                        RowUI existingRow = existingSlots[0].transform.parent.GetComponent<RowUI>();
+
+                        for (int slotIndex = existingSlots.Count; slotIndex < slotConfig.Amount; slotIndex++)
+                        {
+                            //-----------------------------------------------------------------------------------------------------------------
+                            GameObject moduleBayContainer = new GameObject("ModuleBayContainer", typeof(RectTransform));
+                            moduleBayContainer.transform.SetParent(existingRow.transform, false);
+
+                            // Add LayoutElement
+                            UnityEngine.UI.LayoutElement layoutElement = moduleBayContainer.AddComponent<UnityEngine.UI.LayoutElement>();
+                            layoutElement.minWidth = 170f;
+                            layoutElement.minHeight = 170f;
+                            //-----------------------------------------------------------------------------------------------------------------
+
+                            ModuleSlot slotInstance = Instantiate(_moduleSlot, existingRow.transform);
+                            slotInstance.name = $"Slot [{rowIndex}][{slotIndex}]";
+
+                            // Set the accepted rarities for this slot
+                            if (slotIndex < slotConfig.RarityList.Count)
+                            {
+                                slotInstance.SetRaritySlot(slotConfig.RarityList[slotIndex].AcceptedRarities);
+                            }
+
+                            // Subscribe to the slot's click event
+                            slotInstance.OnClick += AssignModule;
+
+                            // Enable the slot
+                            slotInstance.gameObject.SetActive(true);
+
+                            // Add to the row's slot list
+                            existingSlots.Add(slotInstance);
+                        }
+                    }
+                    else if (existingSlots.Count > slotConfig.Amount)
+                    {
+                        // Too many slots - disable extras
+                        for (int slotIndex = slotConfig.Amount; slotIndex < existingSlots.Count; slotIndex++)
+                        {
+                            existingSlots[slotIndex].gameObject.SetActive(false);
+                        }
+                    }
+
+                    // Enable and update the required slots
+                    for (int slotIndex = 0; slotIndex < slotConfig.Amount; slotIndex++)
+                    {
+                        existingSlots[slotIndex].gameObject.SetActive(true);
+
+                        // Update accepted rarities
+                        if (slotIndex < slotConfig.RarityList.Count)
+                        {
+                            existingSlots[slotIndex].SetRaritySlot(slotConfig.RarityList[slotIndex].AcceptedRarities);
+                        }
+                    }
+                }
+            }
+
+            // Handle rows that exist in _inventorySlots but not in config (disable entire row)
+            List<int> rowsToDisable = new List<int>();
+            foreach (var existingRow in _moduleSlots)
+            {
+                if (!_moduleSlotData.ModuleSlots.ContainsKey(existingRow.Key))
+                {
+                    rowsToDisable.Add(existingRow.Key);
+                }
+            }
+
+            foreach (int rowIndex in rowsToDisable)
+            {
+                // Disable all slots in this row
+                foreach (var slot in _moduleSlots[rowIndex])
+                {
+                    slot.gameObject.SetActive(false);
+                }
+            }
+
+            Debug.Log($"[{nameof(ModuleBay)}] Loaded {_moduleSlotData.ModuleSlots.Count} rows.");
+        }
+
+        private void LoadBayModules()
+        {
+            _bayModulesList.Clear();
+
+            // Track current row and modules spawned in current row
+            RowUI currentRow = null;
+            int modulesInCurrentRow = 0;
+            //GameObject moduleBayGrid = Instantiate(_moduleSlotGrid, _bayModuleParent);
+            // Iterate through each rarity in the database
+            foreach (var moduleEntry in _chipDatabase.Modules)
+            {
+                ModuleRarity rarity = moduleEntry.Key;
+                IModuleChipDatabase.Module moduleData = moduleEntry.Value;
+
+                // Spawn modules for this rarity
+                foreach (var chip in moduleData.Pool)
+                {
+                    // Check if we need a new row
+                    //if (currentRow == null || modulesInCurrentRow >= currentRow.Amount)
+                    //{
+                    //    currentRow = Instantiate(_bayModulesRowPrefab, _bayModuleParent);
+                    //    modulesInCurrentRow = 0;
+                    //}
+                    
+                    //----------------------------------------------------------------------------------------------------------------- // Deactive If Alr Equipped 
+                    // Instantiate the BayModules prefab in the current row
+                    GameObject moduleBayContainer = new GameObject("ModuleBayContainer", typeof(RectTransform));
+                    moduleBayContainer.transform.SetParent(_bayModuleParent.transform, false);
+
+                    // Add LayoutElement
+                    UnityEngine.UI.LayoutElement layoutElement = moduleBayContainer.AddComponent<UnityEngine.UI.LayoutElement>();
+                    layoutElement.minWidth = 170f;
+                    layoutElement.minHeight = 170f;
+                    //-----------------------------------------------------------------------------------------------------------------
+
+                    BayModules bayModuleInstance = Instantiate(_bayModules, moduleBayContainer.transform);
+
+                    if (bayModuleInstance is IBayModuleButton btn)
+                    {
+                        btn.OnModuleSelect += OpenModuleDetailWindow;
+                    }
+
+                    // Use GetModuleLevelFromInventory() to read from the correct place
+                    int savedLevel = GetModuleLevelFromInventory(chip.Name);
+
+                    if (savedLevel > 0)
+                    {
+                        chip.CurrentLevel = savedLevel - 1;  // Convert to 0-based index
+                        Debug.Log($"[ModuleBay] Loaded '{chip.Name}' at Level {savedLevel} (from inventory)");
+                    }
+                    else
+                    {
+                        // Fallback to assigned slots
+                        savedLevel = GetLevelFromAssignedSlots(chip.Name);
+                        if (savedLevel > 0)
+                        {
+                            chip.CurrentLevel = savedLevel - 1;
+                            Debug.Log($"[ModuleBay] Loaded '{chip.Name}' at Level {savedLevel} (from slots)");
+                        }
+                        else
+                        {
+                            chip.CurrentLevel = 0;
+                            Debug.Log($"[ModuleBay] '{chip.Name}' defaulting to Level 1");
+                        }
+                    }
+
+                    // Initialize the bay module with the chip data
+                    var initData = new IBayModules.BayModuleInitData
+                    {
+                        Chip = chip,
+                        Rarity = rarity,
+                        ModuleData = moduleData
+                    };
+                    bayModuleInstance.Initialize(initData);
+
+                    modulesInCurrentRow++;
+                    _bayModulesList.Add(bayModuleInstance);
+                }
+            }
+            SortModule();
+        }
+
+        public void OpenModuleDetailWindow(IBayModules selectedModule)
+        {
+            _currentSelectedModule = selectedModule;
+
+            WindowsHandler.Instance.Open(ModuleDetailWindow.Instance);
+
+            ModuleDetailData windowData = new ModuleDetailData
+            {
+                BayModule = selectedModule
+            };
+
+            //IMPORTANT
+            //bind events in moduledetailwindow after the initialize cuz in initialize all the events are set to null to reset it
+            (ModuleDetailWindow.Instance as ICanInitialize).Initialize(windowData);
+            ModuleDetailWindow.Instance.OnEquip += EnableCanSlots;
+            ModuleDetailWindow.Instance.OnUpgrade += UpdateUpgradedModuleStats;
+            ModuleDetailWindow.Instance.DisplayEquipState();
+        }
+
+        public void UpdateUpgradedModuleStats(IBayModules selectedModule)
+        {
+            //update the module level in module list
+            selectedModule.UpdateModuleLevel();
+
+            //find module in the module slots and update the visuals of it
+            foreach (List<ModuleSlot> rowSlot in _moduleSlots.Values)
+            {
+                foreach (var slot in rowSlot)
+                {
+                    if (slot.Module == selectedModule)
+                    {
+                        slot.UpdateModuleLevel();
+                    }
+                }
+            }
+        }
+
+        public void EnableCanSlots(IBayModules selectedModule)
+        {
+            //ModuleDetailWindow.Instance.OnEquip -= EnableCanSlots;
+            ////Check if clicked on different module reset while having another module selected
+            //if (_currentSelectedModule != selectedModule)
+            //{
+            //    if (_currentSelectedModule is IBayModuleButton moduleBtn)
+            //    {
+            //        //this is to prevent the same rarity slots from reseting when click on the same module rarity
+            //        //so that it only reset the module select but not the inventory slots' visuals
+            //        moduleBtn.OnModuleDeselect -= DisableEnabledSlot;
+            //        moduleBtn.Deselect();
+            //        moduleBtn.OnModuleDeselect += DisableEnabledSlot;
+            //    }
+            //}
+            _cover.gameObject.SetActive(true);
+            ModuleBayState = ModuleBayState.Equiping;
+
+            foreach (List<ModuleSlot> rowSlot in _moduleSlots.Values)
+            {
+                foreach (var slot in rowSlot)
+                {
+                    if (slot.RaritySlot.TryGetValue(selectedModule.BayModuleData.Rarity, out var slotRarity))
+                    {
+                        slot.EnableSlot();
+                        slot.StartShakeSlot();
+                        _currentEnableSlot.Add(slot);
+                    }
+                    else
+                    {
+                        slot.DisableSlot();
+                        slot.GrayOutSlot();
+                        _currentDisableSlot.Add(slot);
+                    }
+                }
+            }
+
+        }
+
+        private void AssignModule(IModuleSlot selectedSlot)
+        {
+            //check and remove indentical modules
+            foreach (var row in _moduleSlots)
+            {
+                foreach (var slot in row.Value)
+                {
+                    if (slot.Chip == _currentSelectedModule.BayModuleData.Chip)
+                    {
+                        slot.UnAssignModule();
+                        break;
+                    }
+                }
+            }
+
+            if (selectedSlot.Module != null)
+            {
+                Debug.Log("<color=white>REPLACE !</color>");
+                selectedSlot.UnAssignModule();
+            }
+            //selectedSlot.OnClick -= AssignModule;
+            SlotIn(selectedSlot); 
+
+            foreach (var slot in _currentEnableSlot)
+            {
+                slot.StopShakeSlot();
+            }
+        }
+
+        private void SlotIn(IModuleSlot selectedSlot)
+        {
+            if (_currentSelectedModule == null)
+                return;
+
+            // Disable The Selected Module First To Hide
+            MoveModuleUpward(((Component)_currentSelectedModule).transform); 
+            // Change The Visual For Animating
+            _animateModule.AssignModule(_currentSelectedModule);
+
+            // Set The Position
+            GameObject animateModuleGameObject = ((Component)_animateModule).transform.gameObject;
+            Transform StartPostiion = ((Component)_currentSelectedModule).transform;
+            Transform EndPosition = ((Component)selectedSlot).transform;
+            animateModuleGameObject.transform.position = StartPostiion.position;
+            animateModuleGameObject.SetActive(true);
+
+            AnimateModuleMove(animateModuleGameObject.transform, EndPosition, 0.5f, null,() =>
+            {
+                selectedSlot.AssignModule(_currentSelectedModule);
+                _currentSelectedModule.EnableGrayBox();
+                ResetModuleBayState();
+                animateModuleGameObject.SetActive(false);
+            });
+        }
+
+        public void MoveModuleUpward(Transform currentModule)
+        {
+            if (currentModule == null) return;
+
+            // Hide the current module's container to start the shifting animation
+            currentModule.gameObject.SetActive(false);
+
+            bool started = false;
+            int sibling = 0;
+            Transform previousModuleContainer = null;
+            Transform lastModuleContainer = null;
+
+            // Iterate through all module containers inside the bay (assuming _bayModuleParentis the container of module containers)
+
+            for (int i = _bayModuleParent.childCount - 1; i >= 0; i--)
+            {
+                Transform moduleContainer = _bayModuleParent.GetChild(i);
+                if (moduleContainer.gameObject.activeSelf && moduleContainer == currentModule.parent)
+                {
+                    currentModule.parent.gameObject.SetActive(false);
+                    currentModule.gameObject.SetActive(true);
+                    return;
+                } else if ((moduleContainer.gameObject.activeSelf && moduleContainer != currentModule.parent))
+                {
+                    break;
+                }
+            }
+
+            for (int i = 0; i < _bayModuleParent.childCount; i++)
+            {
+                Transform moduleContainer = _bayModuleParent.GetChild(i);
+
+                if (!moduleContainer.gameObject.activeSelf)
+                {
+                    continue;
+                }
+                else
+                {
+                    lastModuleContainer = moduleContainer;
+                }
+
+                // When we find the container that contains the currentModule, mark started true and record sibling index
+                if (moduleContainer == currentModule.parent && !started)
+                {
+                    sibling = moduleContainer.GetSiblingIndex();
+                    started = true;
+                    previousModuleContainer = moduleContainer;
+                    continue;  // Skip shifting for this container itself
+                }
+
+                if (!started)
+                    continue;  // Don't start shifting until after the current module container is found
+
+                // Shift the module in this container to the previous container
+                Transform module = moduleContainer.GetChild(0);
+
+                // Save the target container before updating previousModuleContainer
+                Transform targetContainer = previousModuleContainer;
+
+                AnimateModuleMove(module, targetContainer, 0.5f, null,() => {
+                    module.SetParent(targetContainer, false);
+                    module.localPosition = Vector3.zero;
+
+                    if (lastModuleContainer == moduleContainer) // When Reach Last Module Container
+                    {
+                        currentModule.SetParent(lastModuleContainer, false);
+                        currentModule.gameObject.SetActive(true);
+                        currentModule.parent.gameObject.SetActive(false);
+                        currentModule.parent.SetSiblingIndex(sibling);
+                    }
+
+                });
+                previousModuleContainer = moduleContainer;
+
+            }
+
+        }
+
+        public void SlotOut(IBayModules selectedSlot ,Transform slotPosition)
+        {
+            _animateModule.AssignModule(selectedSlot);
+
+            Transform nextTargetContainer = null; // Not The Real Target , Use It As Animation Purpose , Cannot Get Direction For Deactive Object
+            Transform targetContainer = null;
+
+            for (int i = 0; i < _bayModuleParent.childCount; i++)
+            {
+                Transform moduleContainer = _bayModuleParent.GetChild(i);
+
+                if (moduleContainer.childCount > 0 &&
+                    moduleContainer.GetChild(0)
+                        .GetComponent<BayModules>()
+                        .BayModuleData.Chip == selectedSlot.BayModuleData.Chip)
+                {
+
+                    targetContainer = moduleContainer;
+                }
+
+                // Find Tiok And Start Find The Next Active Container
+                if (targetContainer != null && targetContainer != moduleContainer && nextTargetContainer == null)
+                {
+                    if (moduleContainer.gameObject.activeSelf)
+                    {
+                        nextTargetContainer = moduleContainer;
+                    }
+                }
+            }
+
+            if(nextTargetContainer == null)
+            {
+                nextTargetContainer = targetContainer;
+            }
+
+            if (targetContainer != null && nextTargetContainer != null)
+            {
+                GameObject animateModuleGameObject = ((Component)_animateModule).transform.gameObject;
+                animateModuleGameObject.transform.position = slotPosition.position;
+                animateModuleGameObject.SetActive(true);
+
+                AnimateModuleMove(animateModuleGameObject.transform, nextTargetContainer, 0.5f, null
+                    , () => {
+                        animateModuleGameObject.SetActive(false);
+                        targetContainer.gameObject.SetActive(true);
+                        targetContainer.GetChild(0).gameObject.SetActive(true);
+
+                    });
+            }
+
+        }
+
+        private void AnimateModuleMove(Transform module,Transform target,float duration, Action onStart = null, Action onComplete = null){
+
+            module.DOMove(target.position, duration)
+                  .SetEase(Ease.OutQuad)
+                   .OnStart(() =>
+                   {
+                       onStart?.Invoke();
+                   })
+                  .OnComplete(() =>
+                  {
+                      onComplete?.Invoke();
+                  });
+        }
+
+        public void MoveModuleDownward(Transform currentModule)
+        {
+            if (currentModule == null) return;
+
+            bool started = false;
+            Transform firstActiveContainer = null;
+            Transform previousActiveContainer = null;
+
+            for (int i = 0; i < _bayModuleParent.childCount; i++)
+            {
+                Transform moduleContainer = _bayModuleParent.GetChild(i);
+
+                if (moduleContainer == currentModule.parent && !started)
+                {
+                    started = true;
+                    continue;
+                }
+
+                if (!started || !moduleContainer.gameObject.activeSelf)
+                    continue;
+
+                if (firstActiveContainer == null)
+                {
+                    firstActiveContainer = moduleContainer;
+                    previousActiveContainer = moduleContainer;
+                    continue;
+                }
+                
+                if (previousActiveContainer.childCount > 0)
+                {
+                    Transform module = previousActiveContainer.GetChild(0);
+                    Transform TargetContainer = _bayModuleParent.GetChild(i);
+
+                    AnimateModuleMove(module, TargetContainer, 0.5f
+                    ,() => { // On Start
+                        if (firstActiveContainer != null)
+                        {
+                            firstActiveContainer.SetAsLastSibling();
+                            firstActiveContainer = null;
+                        }
+                    }, 
+                    () =>{ // On Complete
+                        module.SetParent(TargetContainer, false);
+                        module.localPosition = Vector3.zero;
+                    });
+                }
+
+                previousActiveContainer = moduleContainer;
+            }
+
+            // Only For Last
+            if (previousActiveContainer != null)
+            {
+                Transform origin = previousActiveContainer.GetChild(0);
+                Transform target = firstActiveContainer;
+
+                AnimateModuleMove(origin, target, 0.5f
+                   , () => { // On Start
+                       origin.gameObject.SetActive(false);
+                   },
+                   () => { // On Complete
+                       origin.SetParent(target, false);
+                       origin.localPosition = Vector3.zero;
+                       origin.gameObject.SetActive(true);
+                   });
+            }
+        }
+
+        public void UpdateModuleBay()
+        {
+            foreach(var module in _bayModulesList)
+            {
+                module.UpdateModuleLevel();
+            }
+        }
+
+        public static void InitializedModuleBay()
+        {
+            if (Instance.IsInitialized)
+            {
+                Debug.LogWarning("[ModuleBay] Already initialized, skipping");
+                return;
+            }
+
+            Instance.LoadInventorySlots();
+            Instance.LoadBayModules();
+            ModuleBaySaveSystem.LoadAssignedModules();
+            ModuleBayWindow.Instance.OnCloseEvent += Instance.ResetModuleBayState;
+
+            Instance.IsInitialized = true;
+            Debug.Log("[ModuleBay] Initialization complete");
+        }
+
+        private int GetModuleLevelFromInventory(string moduleName)
+        {
+            JObject inventory = PlayerProfiles.Instance.GetInventory();
+            JArray acquiredModules = inventory?[SaveKeys.SAVE_KEY_ACQUIREDMODULES] as JArray;
+
+            if (acquiredModules == null)
+            {
+                Debug.LogWarning($"[ModuleBay] No acquired modules in inventory");
+                return 0;
+            }
+
+            var module = acquiredModules
+                .OfType<JObject>()
+                .FirstOrDefault(m => m[SaveKeys.SAVE_KEY_ACQUIREDMODULES_NAME]?.ToString() == moduleName);
+
+            if (module != null && module[SaveKeys.SAVE_KEY_ACQUIREDMODULES_CURRENTLEVEL] != null)
+            {
+                int level = module[SaveKeys.SAVE_KEY_ACQUIREDMODULES_CURRENTLEVEL].ToObject<int>();
+                Debug.Log($"[ModuleBay] Found '{moduleName}' in inventory with Level {level}");
+                return level;
+            }
+
+            Debug.Log($"[ModuleBay] '{moduleName}' not found in inventory");
+            return 0;
+        }
+
+        private int GetLevelFromAssignedSlots(string moduleName)
+        {
+            JObject inventory = PlayerProfiles.Instance.GetInventory();
+            JArray assignedSlots = inventory?[SaveKeys.SAVE_KEY_ASSIGNEDSLOTS] as JArray;
+
+            if (assignedSlots == null)
+            {
+                return 0;
+            }
+
+            var slot = assignedSlots
+                .OfType<JObject>()
+                .FirstOrDefault(s => s[SaveKeys.SAVE_KEY_ASSIGNEDSLOTS_CHIPNAME]?.ToString() == moduleName);
+
+            if (slot != null && slot[SaveKeys.SAVE_KEY_ASSIGNEDSLOTS_CURRENTMODULELEVEL] != null)
+            {
+                int level = slot[SaveKeys.SAVE_KEY_ASSIGNEDSLOTS_CURRENTMODULELEVEL].ToObject<int>();
+                Debug.Log($"[ModuleBay] Found '{moduleName}' in assigned slots with Level {level}");
+                return level;
+            }
+
+            return 0;
+        }
+
+        #region RarityLevelSlot
+        private void SortModulesBy(Func<BayModules, IComparable> sortKeySelector, bool descending = true)
+        {
+            // Grid (ModuleSlotGrid(Clone))
+            Transform grid = _bayModuleParent;
+
+            // 1. Collect slots that contain ACTIVE modules
+            List<Transform> slots = new List<Transform>();
+
+            foreach (Transform slot in grid)
+            {
+                if (slot.childCount == 0)
+                    continue;
+
+                Transform module = slot.GetChild(0);
+                if (!module.gameObject.activeSelf)
+                    continue;
+
+                slots.Add(slot);
+            }
+
+            // 2. Sort slots by their module data
+            slots.Sort((a, b) =>
+            {
+                BayModules A = a.GetChild(0).GetComponent<BayModules>();
+                BayModules B = b.GetChild(0).GetComponent<BayModules>();
+
+                if (A == null || B == null)
+                    return 0;
+
+                int cmp = sortKeySelector(A).CompareTo(sortKeySelector(B));
+                return descending ? -cmp : cmp;
+            });
+
+            // 3. Cache old positions (for animation)
+            Dictionary<Transform, Vector3> oldPositions = new Dictionary<Transform, Vector3>();
+            foreach (Transform slot in slots)
+                oldPositions[slot] = slot.position;
+
+            // 4. Apply new sibling order
+            for (int i = 0; i < slots.Count; i++)
+                slots[i].SetSiblingIndex(i);
+
+            // 5. Force layout rebuild
+            Canvas.ForceUpdateCanvases();
+            LayoutRebuilder.ForceRebuildLayoutImmediate(grid.GetComponent<RectTransform>());
+
+            // 6. Animate slots to new positions
+            float duration = 0.5f;
+            int remaining = slots.Count;
+
+            foreach (Transform slot in slots)
+            {
+                slot.DOKill();
+
+                Vector3 oldPos = oldPositions[slot];
+                Vector3 newPos = slot.position;
+
+                slot.position = oldPos;
+
+                slot.DOMove(newPos, duration)
+                    .SetEase(Ease.OutQuad)
+                    .OnComplete(() =>
+                    {
+                        remaining--;
+
+                        if (remaining <= 0)
+                            isAnimating = false;
+                    });
+            }
+        }
+
+        public void SortModule()
+        {
+
+            if (isAnimating)
+                return;
+
+            isAnimating = true;
+
+            if (currentSort == SortType.Rarity)
+            {
+                _sortBtnTxt.text = "By Level";
+                SortByLevel();
+            }
+            else
+            {
+                _sortBtnTxt.text = "By Rarity";
+                SortByRarity();
+            }
+        }
+
+        private void SortByRarity()
+        {
+            currentSort = SortType.Rarity;
+            descending = true;   // default descending
+            SortModulesBy(m => m.BayModuleData.Rarity, descending);
+        }
+
+        private void SortByLevel()
+        {
+            currentSort = SortType.Level;
+            descending = true;   // default descending
+            SortModulesBy(m => m.BayModuleData.Chip.CurrentLevel, descending);
+        }
+
+        public void FlipSort()
+        {
+            if (isAnimating)
+                return;
+
+            isAnimating = true;
+
+            descending = !descending;  // toggle direction
+
+            // Animate rotation by adding 180 degrees on Z axis relative to current rotation
+            _flipBtnRectTransform.DOLocalRotate(new Vector3(0, 0, 180), 0.5f, RotateMode.LocalAxisAdd)
+                .SetEase(Ease.OutQuad);
+
+            switch (currentSort)
+            {
+                case SortType.Rarity:
+                    SortModulesBy(m => m.BayModuleData.Rarity, descending);
+                    break;
+                case SortType.Level:
+                    SortModulesBy(m => m.BayModuleData.Chip.CurrentLevel, descending);
+                    break;
+            }
+        }
+
+        #endregion
+    }
+
+}
+</code></pre>
+            </div>
+        </section>     
+    </main>
+    
+    <footer class="footer">
+        ©2026 Aik Chun.<br> All rights reserverd.
+    </footer>
+</body>
+
+<!-- Sidebar Menu -->
+<script>
+    const sidebar = document.getElementById("sidebar-menu");
+    const toggleBtn = document.getElementById("toggle-sidebar");
+    const sidebarIcon = document.getElementById("sidebar-icon");
+    const overlay = document.getElementById("overlay");
+    document.documentElement.style.setProperty(
+        "--sidebar-width",
+        sidebar.offsetWidth + "px"
+    );
+
+    let isOpen = false;
+
+    toggleBtn.addEventListener("click", () => {
+        isOpen = !isOpen;
+
+        if (isOpen) {
+            sidebar.classList.remove("closed");
+            sidebar.classList.add("open");
+
+            overlay.classList.remove("closed");
+
+            toggleBtn.style.transform = "translateX(var(--sidebar-width))";
+            sidebarIcon.classList.add("rotate-180", "mb-1");
+            sidebarIcon.classList.remove("mt-1");
+
+        } else {
+            sidebar.classList.remove("open");
+            sidebar.classList.add("closed");
+
+            overlay.classList.add("closed");
+
+            toggleBtn.style.transform = "translateX(0px)";
+            sidebarIcon.classList.remove("rotate-180", "mb-1");
+            sidebarIcon.classList.add("mt-1");
+        }
+    });
+
+    overlay.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    });
+
+</script>
+
+<script>
+    function showSection(id, pushHash = true) {
+        const sections = document.querySelectorAll(".code-section");
+
+        sections.forEach(section => {
+            if (section.id === id) return;
+
+            section.classList.remove("active");
+            section.classList.add("hidden");
+
+            setTimeout(() => {
+                section.classList.add("hidden");
+            }, 300);
+        });
+
+        const active = document.getElementById(id);
+        if (!active) return;
+
+        active.classList.remove("hidden");
+        active.classList.add("active");
+
+        const title = active.querySelector(".code-title")?.innerText;
+        if (title) {
+            document.title = title + " | AC Portfolio";
+        }
+
+        if (pushHash) {
+            history.pushState(null, null, "#" + id);
+        }
+
+        // Close sidebar
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    }
+
+    window.addEventListener("hashchange", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("popstate", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("load", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id);
+        }
+    });
+</script>
+
+</html>

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MapNodeGenerator.cs</title>
+    <title>MapNodeGenerator.cs | AC Portfolio</title>
 
     <!-- Tailwind CSS -->
     <link href="../../../main.css" rel="stylesheet">
@@ -22,7 +22,7 @@
 
 </head>
 
-<body>
+<body class="min-h-screen">
     <button id="toggle-sidebar" class="code-sidebar-toggle">
         <div id="sidebar-icon" class="code-sidebar-icon">
             <i class="fi fi-rr-angle-right text-xl"></i>
@@ -39,7 +39,7 @@
         
     </div>
 
-    <main>
+    <main class="grow bg-darkGreen">
         <section id="code-1" class="code-section active">
             <div class="code-container">
                 <h2 class="code-title"> MapNodeGenerator.cs</h2>
@@ -578,13 +578,12 @@ namespace Gameplay
 }
 </code></pre>
             </div>
-        </section>
-
-        <footer class="footer">
-            ©2026 Aik Chun.<br> All rights reserverd.
-        </footer>
-
+        </section>       
     </main>
+
+    <footer class="footer">
+        ©2026 Aik Chun.<br> All rights reserverd.
+    </footer>
 
 </body>
 
@@ -664,7 +663,7 @@ namespace Gameplay
 
         const title = active.querySelector(".code-title")?.innerText;
         if (title) {
-            document.title = title;
+            document.title = title + " | AC Portfolio";
         }
 
         if (pushHash) {

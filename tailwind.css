@@ -314,6 +314,10 @@ body {
         @apply mb-3 hover:text-gold cursor-pointer text-start text-lg;
     }
 
+    .code-sidebar-divider{
+        @apply h-0.5 bg-gold mb-3;
+    }
+
     /* Toggle Button */
     .code-sidebar-toggle {
         @apply fixed top-1/2 -translate-y-1/2 bg-gold text-darkGreen px-2 py-6 rounded-r-lg z-50 transition-all duration-300;
@@ -333,7 +337,7 @@ body {
 
     /* Code Section */
     .code-section {
-        @apply flex flex-col bg-darkGreen py-10 transition-opacity duration-300 ease-in-out;
+        @apply flex flex-col py-10 transition-opacity duration-300 ease-in-out;
     }
 
     .code-section.hidden {
