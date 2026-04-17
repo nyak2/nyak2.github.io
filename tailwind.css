@@ -224,7 +224,19 @@ body {
     }
 
     .workItem-gallery-image {
-        @apply w-full h-full object-cover lg:object-contain hover:scale-102 transition-transform duration-300 cursor-zoom-in;
+        @apply w-full h-full object-contain hover:scale-102 transition-transform duration-300 cursor-zoom-in px-8 py-3;
+    }
+
+    .workItem-gallery-image.hidden {
+        @apply hidden;
+    }
+
+    .workItem-gallery-video {
+        @apply w-full h-full object-contain hover:scale-102 transition-transform duration-300 cursor-zoom-in px-8 py-3;
+    }
+
+    .workItem-gallery-video.hidden {
+        @apply hidden;
     }
 
     .workItem-gallery-prev {
@@ -244,23 +256,35 @@ body {
     }
 
     .workItem-gallery-thumb {
-        @apply w-20 h-20 object-cover rounded cursor-pointer opacity-60 hover:opacity-100 transition border-2 border-transparent hover:border-gold shrink-0;
+        @apply w-20 h-20 lg:w-22 lg:h-22 object-cover rounded cursor-pointer opacity-60 hover:opacity-100 transition border-2 border-transparent hover:border-gold shrink-0;
     }
 
     .workItem-image-focus-overlay {
-        @apply fixed inset-0 bg-black/80 z-50 flex items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300;
+        @apply fixed inset-0 bg-black/80 z-50 flex flex-col gap-3 items-center justify-center opacity-0 pointer-events-none transition-opacity duration-300;
     }
 
     .workItem-image-focus-overlay.open {
         @apply opacity-100 pointer-events-auto;
     }
 
-    .workItem-image-focus-content {
-        @apply relative max-w-xl w-full p-4;
+    .workItem-image-focus-image {
+        @apply block object-contain rounded;
     }
 
-    .workItem-image-focus-image {
-        @apply block object-contain w-full h-auto rounded;
+    .workItem-image-focus-image.hidden {
+        @apply hidden;
+    }
+
+    .workItem-image-focus-video {
+        @apply block object-contain rounded;
+    }
+
+    .workItem-image-focus-video.hidden {
+        @apply hidden;
+    }
+
+    .workItem-image-focus-caption {
+        @apply text-gold text-2xl underline italic text-center;
     }
 
     .workItem-details-section {
@@ -314,7 +338,7 @@ body {
         @apply mb-3 hover:text-gold cursor-pointer text-start text-lg;
     }
 
-    .code-sidebar-divider{
+    .code-sidebar-divider {
         @apply h-0.5 bg-gold mb-3;
     }
 
