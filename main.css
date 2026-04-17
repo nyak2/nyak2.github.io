@@ -276,6 +276,9 @@
   .h-100 {
     height: calc(var(--spacing) * 100);
   }
+  .max-h-150 {
+    max-height: calc(var(--spacing) * 150);
+  }
   .min-h-screen {
     min-height: 100vh;
   }
@@ -1303,6 +1306,7 @@ body {
     display: block;
     border-radius: 0.25rem;
     object-fit: contain;
+    padding-inline: calc(var(--spacing) * 5);
   }
   .workItem-image-focus-image.hidden {
     display: none;
@@ -1311,6 +1315,7 @@ body {
     display: block;
     border-radius: 0.25rem;
     object-fit: contain;
+    padding-inline: calc(var(--spacing) * 5);
   }
   .workItem-image-focus-video.hidden {
     display: none;
