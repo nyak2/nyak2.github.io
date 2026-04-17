@@ -55,7 +55,7 @@ body {
     }
 
     .nav {
-        @apply relative text-2xl md:text-3xl flex flex-col items-center text-gold no-underline pointer-events-auto;
+        @apply relative text-2xl md:text-3xl flex flex-col items-center text-gold no-underline pointer-events-auto text-center;
     }
 
     .nav::after {
