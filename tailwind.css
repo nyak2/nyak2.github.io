@@ -168,7 +168,7 @@ body {
 
     /* #region Work Detail */
     .work-overlay {
-        @apply absolute inset-0 bg-black/60;
+        @apply absolute inset-0 bg-black/70;
     }
 
     .work-video {

@@ -20,6 +20,14 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Outfit:wght@100..900&display=swap"
         rel="stylesheet">
+
+    <!-- Prism -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-csharp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
 </head>
 
 <body>
@@ -31,6 +39,9 @@
 
             <!-- Projects Icon -->
             <a href="/projects.html" class="nav"> Projects </a>
+
+            <!-- Projects Icon -->
+            <a href="/Projects/Gachabuds.html" class="nav">GachaBuds </a>
         </nav>
 
         <button id="menu-btn" class="lg:hidden ml-auto mt-1">
@@ -41,7 +52,6 @@
 
     <!-- Mobile navigation overlay -->
     <div id="mobile-menu" class="mobile-menu">
-
         <!-- Sliding menu panel -->
         <nav id="menu-panel" class="menu-panel">
             <div class="w-[80%] grid auto-rows-auto gap-10">
@@ -49,20 +59,120 @@
                 <a href="/index.html" class="nav"> Home </a>
 
                 <a href="/projects.html" class="nav"> Projects </a>
+
+                <a href="/Projects/Gachabuds.html" class="nav"> GachaBuds </a>
             </div>
 
         </nav>
     </div>
 
 
-    <main class="default-main-padding">
-        <footer class="mt-5">
-            <div class="text-center text-lg text-gold pb-5">
-                ©2026 Aik Chun.<br> All rights reserverd.
+    <main>
+        <section class="relative h-100 md:h-150 lg:h-225 overflow-hidden">
+            <video autoplay muted loop playsinline preload="metadata" class="work-video">
+                <source src="/assets/GachaBuds/Videos/">
+            </video>
+            <div class="work-overlay"></div>
+            <div class="work-section">
+                <span class="work-title-engine"> Unreal Engine 5</span>
+                <h1 class="work-title"> Mindslayer</h1>
+                <p class="work-title-genre"> 3D, first-person shooter </p>
             </div>
+        </section>
+
+        <section class="my-15 default-margin flex flex-col md:flex-row items-center justify-center gap-5">
+            <div class="work-content-section">
+                <h2 class="work-content-title">Role</h2>
+                <p class="work-content-description">AI Programmer</p>
+            </div>
+            <div class="work-content-section">
+                <h2 class="work-content-title">Game Link</h2>
+                <!-- <p class="work-content-description"> Coming Soon</p> -->
+                <a href="https://orangbotak.itch.io/mindslayer" target="_blank">
+                    <p class="work-content-link"> Click Here</p>
+                </a>
+            </div>
+        </section>
+
+        <section class="workItem-section">
+            <div class="py-10 justify-center items-center">
+                <h2 class="workItem-Title">Contributed Works</h2>
+            </div>
+
+            <div class="default-margin flex flex-col gap-15 lg:gap-25 mb-10">
+                <!-- Work Item 2 -->
+                <div class="workItem-content">
+                    <!-- Hero Gallery (Full Width) -->
+                    <div class="workItem-gallery-container">
+                        <div class="workItem-gallery-main">
+                            <img src="" class="workItem-gallery-image">
+                            <video class="workItem-gallery-video" autoplay muted loop playsinline></video>
+
+                            <!-- Navigation Arrows -->
+                            <button class="workItem-gallery-prev">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-left"></i>
+                                </div>
+                            </button>
+                            <button class="workItem-gallery-next">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-right"></i>
+                                </div>
+                            </button>
+
+                            <!-- Counter -->
+                            <div class="workItem-gallery-counter">
+                                <span class="current-index">1</span> / <span class="total-images">3</span>
+                            </div>
+                        </div>
+
+                        <!-- Thumbnail Navigation -->
+                        <div class="workItem-gallery-thumbnails">
+                            <!-- <video src="/assets/RiskyBakeness/Videos/ItemShadow-Demo.webm" alt="Thumb"
+                                class="workItem-gallery-thumb" data-type="video" data-caption="Demo View"></video>
+                            <img src="/assets/RiskyBakeness/Pics/ItemShadow-1.webp" alt="Thumb"
+                                class="workItem-gallery-thumb" data-type="image" data-caption="With Shadow">
+                            <img src="/assets/RiskyBakeness/Pics/ItemShadow-2.webp" alt="Thumb"
+                                class="workItem-gallery-thumb" data-type="image" data-caption="With No Shadow"> -->
+                        </div>
+                    </div>
+
+                    <!-- Title and Description Section -->
+                    <div class="workItem-details-section">
+                        <div class="workItem-details-header">
+                            <h3 class="workItem-details-title"></h3>
+                            <a href="/assets/Mindslayer/" target="_blank"
+                                class="workItem-code-link">
+                                View Full Code
+                            </a>
+                        </div>
+                        <p class="workItem-details-description">
+                        </p>
+                        <a href="/assets/Mindslayer/" target="_blank"
+                            class="workItem-code-link-mobile">
+                            View Full Code
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <footer class="footer">
+            ©2026 Aik Chun.<br> All rights reserverd.
         </footer>
 
     </main>
+
+    <div id="workItem-image-focus-overlay" class="workItem-image-focus-overlay">
+        <img src="" class="workItem-image-focus-image">
+
+        <video class="workItem-image-focus-video max-h-150" autoplay muted loop playsinline>
+            <source src="" type="video/webm">
+        </video>
+
+        <p class="workItem-image-focus-caption"></p>
+    </div>
 
     <!-- Toggle mobile menu -->
     <script>
@@ -90,6 +200,147 @@
 
             if (linkPage === currentPage || (currentPage === "" && linkPage === "index.html")) {
                 link.classList.add("nav-active");
+            }
+        });
+    </script>
+
+    <!-- Gallery Carousel Functionality -->
+    <script>
+        function initializeGalleries() {
+            document.querySelectorAll(".workItem-gallery-container").forEach((gallery) => {
+                const images = gallery.querySelectorAll(".workItem-gallery-thumb");
+                const prevBtn = gallery.querySelector(".workItem-gallery-prev");
+                const nextBtn = gallery.querySelector(".workItem-gallery-next");
+                const currentIndexSpan = gallery.querySelector(".current-index");
+                const totalImagesSpan = gallery.querySelector(".total-images");
+
+                const displayImage = gallery.querySelector(".workItem-gallery-image");
+                const displayVideo = gallery.querySelector(".workItem-gallery-video");
+
+                let currentIndex = 0;
+
+                // Update total images count
+                totalImagesSpan.textContent = images.length;
+
+                // Function to update gallery display
+                const updateGallery = (index) => {
+                    currentIndex = (index + images.length) % images.length;
+
+                    currentIndexSpan.textContent = currentIndex + 1;
+
+                    // Reset both
+                    displayImage.classList.add("hidden");
+                    displayVideo.classList.add("hidden");
+                    displayVideo.pause();
+
+                    if (images[currentIndex].dataset.type === "video") {
+                        displayVideo.src = images[currentIndex].src;
+                        displayVideo.classList.remove("hidden");
+                        displayVideo.play();
+                    } else {
+                        displayImage.src = images[currentIndex].src;
+                        displayImage.classList.remove("hidden");
+                    }
+
+                    // Update thumbnail styling
+                    images.forEach((thumb, i) => {
+                        thumb.style.opacity = i === currentIndex ? "1" : "0.6";
+                        if (i === currentIndex) {
+                            thumb.style.borderColor = "var(--color-gold)";
+                        } else {
+                            thumb.style.borderColor = "transparent";
+                        }
+                    });
+                };
+
+                // Navigation button handlers
+                prevBtn.addEventListener("click", () => updateGallery(currentIndex - 1));
+                nextBtn.addEventListener("click", () => updateGallery(currentIndex + 1));
+
+                // Thumbnail click handlers
+                images.forEach((thumb, index) => {
+                    thumb.addEventListener("click", () => updateGallery(index));
+                });
+
+                // Initialize first image
+                updateGallery(0);
+            });
+        }
+
+        // Initialize galleries when DOM is ready
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initializeGalleries);
+        } else {
+            initializeGalleries();
+        }
+
+        const focusOverlay = document.getElementById("workItem-image-focus-overlay");
+        const focusImage = focusOverlay.querySelector(".workItem-image-focus-image");
+        const focusVideo = focusOverlay.querySelector(".workItem-image-focus-video");
+        const focusText = focusOverlay.querySelector("p");
+
+        const openImageFocus = (image) => {
+            focusImage.classList.remove("hidden");
+
+            focusImage.src = image.src;
+
+            focusOverlay.classList.add("open");
+            document.body.style.overflow = "hidden";
+        };
+
+        const openVideoFocus = (video) => {
+            focusVideo.classList.remove("hidden");
+
+            focusVideo.src = video.src;
+            focusVideo.play();
+
+            focusOverlay.classList.add("open");
+            document.body.style.overflow = "hidden";
+        };
+
+        const closeImageFocus = () => {
+            focusOverlay.classList.remove("open");
+            document.body.style.overflow = "";
+        };
+
+        const galleryFindCaption = (media) => {
+            const gallery = media.closest(".workItem-gallery-container");
+            const thumbs = gallery.querySelectorAll(".workItem-gallery-thumb");
+
+            for (let thumb of thumbs) {
+                if (thumb.src === media.src) {
+                    return thumb.dataset.caption;
+                }
+            }
+            return "";
+        };
+
+        document.querySelectorAll(".workItem-gallery-image, .workItem-gallery-video").forEach((media) => {
+            media.addEventListener("click", () => {
+                focusImage.classList.add("hidden");
+                focusVideo.classList.add("hidden");
+
+                const caption = galleryFindCaption(media);
+
+                focusText.textContent = caption || "";
+
+                if (media.tagName === "VIDEO") {
+                    openVideoFocus(media);
+                } else {
+                    openImageFocus(media);
+                }
+            });
+        });
+
+        focusOverlay.addEventListener("click", (event) => {
+            if (event.target === focusOverlay) {
+                closeImageFocus();
+            }
+        });
+
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape" && focusOverlay.classList.contains("open")) {
+                closeImageFocus();
             }
         });
     </script>
