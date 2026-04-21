@@ -203,6 +203,10 @@ body {
         @apply text-xl lg:text-2xl text-darkGreen text-center;
     }
 
+    .work-content-link {
+        @apply text-xl lg:text-2xl text-darkGold text-center italic underline;
+    }
+
     .workItem-section {
         @apply flex flex-col bg-darkGreen;
     }

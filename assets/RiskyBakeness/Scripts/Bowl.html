@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bowl.cs | AC Portfolio</title>
+
+    <!-- Tailwind CSS -->
+    <link href="../../../main.css" rel="stylesheet">
+
+    <!-- Prism -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-csharp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Icons -->
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
+
+</head>
+
+<body class="min-h-screen">
+    <button id="toggle-sidebar" class="code-sidebar-toggle">
+        <div id="sidebar-icon" class="code-sidebar-icon">
+            <i class="fi fi-rr-angle-right text-xl"></i>
+        </div>
+    </button>
+
+    <div id="overlay" class="code-sidebar-overlay closed"></div>
+
+    <!-- Drawer -->
+    <div id="sidebar-menu" class="code-sidebar closed">
+        <h2 class="code-sidebar-title">Scripts</h2>
+
+        <button onclick="showSection('code-1')" class="code-sidebar-link">Bowl.cs</button>
+        <button onclick="showSection('code-2')" class="code-sidebar-link">Utensil.cs</button>
+
+    </div>
+
+    <main class="grow bg-darkGreen">
+        <section id="code-1" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title"> Bowl.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Bowl : Utensil
+{
+    [Header("BowlSpawns")]
+    [SerializeField] private Transform _ovenSpawnTrasnform;
+    [SerializeField] private Transform _tableSpawnTrasnform;
+    [SerializeField] private WeightListUI _ingredientWeightList;
+    [SerializeField] private Sprite _fillNoChip;
+    [SerializeField] private Sprite _fillWithChip;
+
+    [SerializeField] private GameManager _gameManager;
+    private bool _onScale;
+    private RigidbodyConstraints _constraints;
+    private bool _isSubscribedToBowl = false;
+    private Sprite _emptyBowlSprite;
+
+    private void Awake()
+    {
+        _constraints = rb.constraints;
+        _emptyBowlSprite = SpriteRenderer.sprite;
+    }
+
+    public override void OnUpdate()
+    {
+        if (_gameManager.CurrentScreen == ScreenTypes.CounterTop)
+        {
+            if(transform.position.x >= 7.0f)
+            {
+                rb.velocity = Vector3.zero;
+                transform.position = _ovenSpawnTrasnform.position;
+            }
+            return;
+        }
+
+        if(_gameManager.CurrentScreen == ScreenTypes.Oven)
+        {
+            if (transform.position.x <= 14.0f)
+            {
+                rb.velocity = Vector3.zero;
+                transform.position = _tableSpawnTrasnform.position;
+            }
+            return;
+        }
+
+    }
+    private void OnCollisionStay(Collision collision)
+    {
+        if(!_onScale)
+        {
+            if (collision.collider.gameObject.CompareTag("Tool"))
+            {
+                if (collision.collider.gameObject.GetComponent<Utensil>() is WeighingScale scale)
+                {
+                    scale.rb.velocity = Vector3.zero;
+                    rb.constraints = RigidbodyConstraints.FreezePositionY;
+                    DisableCollider();
+                    _ingredientWeightList.EnableUI();
+                    _onScale = true;
+                    _ingredientWeightList.SubscribeWeightScreen();
+                }
+
+                if(collision.collider.gameObject.GetComponent<Utensil>() is BakingTray tray)
+                {
+                    if(!tray.AlrPlaced)
+                    {
+                        tray.PlaceDough();
+                        tray.rb.velocity = Vector3.zero;
+                        SpriteRenderer.sprite = _emptyBowlSprite;
+                    }
+                }
+            }
+
+        }
+    }
+    void OnTriggerEnter(Collider other)
+    {
+        if (!_isSubscribedToBowl)
+        {
+            Ingredient ingredient = other.GetComponent<Ingredient>();
+            if (ingredient != null)
+            {
+                // Subscribe to pour events
+                ingredient.OnIngredientPoured += HandleIngredientPoured;
+                _isSubscribedToBowl = true;
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        //if (other.gameObject.CompareTag("Tool"))
+        //{
+        _ingredientWeightList.DisableUI();
+        EnableCollider();
+        _onScale = false;
+        _ingredientWeightList.UnSubscribeWeightScreen();
+        rb.constraints = _constraints;
+
+        Ingredient ingredient = other.GetComponent<Ingredient>();
+        if (ingredient != null && _isSubscribedToBowl)
+        {
+            // Unsubscribe from pour events
+            ingredient.OnIngredientPoured -= HandleIngredientPoured;
+            _isSubscribedToBowl = false;
+        }
+
+        //}
+    }
+
+    private void HandleIngredientPoured(IngredientEnum ingredientType, float amount)
+    {
+        if (!_gameManager.CurrentSession.CurrentBowlMixes.TryGetValue(ingredientType, out RecipeMix value))
+        {
+            RecipeMix newMix = new RecipeMix
+            {
+                HasMixed = false,
+                Order = 0,
+                Weight = 0
+            };
+            newMix.Weight += amount;
+
+            _gameManager.CurrentSession.CurrentBowlMixes.Add(ingredientType, newMix);
+            _ingredientWeightList.UpdateIngredientUI(ingredientType, newMix.Weight);
+        }
+        else
+        {
+            RecipeMix currentMix = _gameManager.CurrentSession.CurrentBowlMixes[ingredientType];
+
+            currentMix.Weight += amount;
+
+            _gameManager.CurrentSession.CurrentBowlMixes[ingredientType] = currentMix;
+            _ingredientWeightList.UpdateIngredientUI(ingredientType, currentMix.Weight);
+        }
+
+        if(_gameManager.CurrentSession.CurrentBowlMixes.TryGetValue(IngredientEnum.CHOCOLATE_CHIPS, out RecipeMix valie))
+        {
+            SpriteRenderer.sprite = _fillWithChip;
+        }
+        else
+        {
+            SpriteRenderer.sprite = _fillNoChip;
+
+        }
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <section id="code-2" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title"> Utensil.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using Sirenix.OdinInspector;
+using UnityEngine;
+
+public abstract class Utensil : SerializedMonoBehaviour
+{
+    [InfoBox("Ingore the Y vector and put the Z instead")]
+    [SerializeField] private Vector3 _minLimit;
+    [SerializeField] private Vector3 _maxLimit;
+
+    [SerializeField] private Rigidbody _rb;
+    [SerializeField] private BoxCollider _boxCollider;
+
+    [SerializeField] private SpriteRenderer _spriteRenderer;
+    private int _oriSortOrder;
+
+    public SpriteRenderer SpriteRenderer => _spriteRenderer;
+    public Rigidbody rb => _rb;
+    private Camera _camera;
+
+    [ReadOnly] public bool _isMoving;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        _camera = Camera.main;
+        _oriSortOrder = _spriteRenderer.sortingOrder;
+    }
+    void Update()
+    {
+        ClampPosition();
+        OnUpdate();
+    }
+
+    public virtual void OnUpdate()
+    {
+
+    }
+
+    public virtual void DragMove(Vector2 pos, Transform obj)
+    {
+        // Create a ray from the camera through the screen position
+        Ray ray = _camera.ScreenPointToRay(new Vector3(pos.x, pos.y, 0));
+
+        // Create a plane at the desired height (adjust the y value as needed)
+        Plane plane = new Plane(Vector3.up, new Vector3(0, obj.localPosition.y, 0));
+
+        // Find where the ray intersects the plane
+        float distance;
+        if (plane.Raycast(ray, out distance))
+        {
+            Vector3 worldPos = ray.GetPoint(distance);
+
+            // Clamp each axis individually
+            worldPos.x = Mathf.Clamp(worldPos.x, _minLimit.x, _maxLimit.x);
+            worldPos.z = Mathf.Clamp(worldPos.z, _minLimit.z, _maxLimit.z);
+
+            _rb.MovePosition(worldPos);
+        }
+    }
+
+    public virtual void ClampPosition()
+    {
+        Vector3 clampedPosition = transform.position;
+
+        // Clamp each axis individually
+        clampedPosition.x = Mathf.Clamp(clampedPosition.x, _minLimit.x, _maxLimit.x);
+        clampedPosition.z = Mathf.Clamp(clampedPosition.z, _minLimit.z, _maxLimit.z);
+
+        transform.position = clampedPosition;
+    }
+
+    public virtual void OnLeftClick()
+    {
+        _rb.useGravity = false;
+        _rb.isKinematic = true;
+        _isMoving = true;
+    }
+
+    public virtual void OnLeftRelease()
+    {
+        _rb.useGravity = true;
+        _rb.isKinematic = false;
+        _isMoving = false;
+    }
+
+    public void DisableCollider()
+    {
+        _boxCollider.isTrigger = true;
+        _spriteRenderer.sortingOrder = 1;
+    }
+
+    public void EnableCollider()
+    {
+        _boxCollider.isTrigger = false;
+        _spriteRenderer.sortingOrder = _oriSortOrder;
+    }
+
+}
+</code></pre>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        ©2026 Aik Chun.<br> All rights reserverd.
+    </footer>
+
+</body>
+
+<!-- Sidebar Menu -->
+<script>
+    const sidebar = document.getElementById("sidebar-menu");
+    const toggleBtn = document.getElementById("toggle-sidebar");
+    const sidebarIcon = document.getElementById("sidebar-icon");
+    const overlay = document.getElementById("overlay");
+    document.documentElement.style.setProperty(
+        "--sidebar-width",
+        sidebar.offsetWidth + "px"
+    );
+
+    let isOpen = false;
+
+    toggleBtn.addEventListener("click", () => {
+        isOpen = !isOpen;
+
+        if (isOpen) {
+            sidebar.classList.remove("closed");
+            sidebar.classList.add("open");
+
+            overlay.classList.remove("closed");
+
+            toggleBtn.style.transform = "translateX(var(--sidebar-width))";
+            sidebarIcon.classList.add("rotate-180", "mb-1");
+            sidebarIcon.classList.remove("mt-1");
+
+        } else {
+            sidebar.classList.remove("open");
+            sidebar.classList.add("closed");
+
+            overlay.classList.add("closed");
+
+            toggleBtn.style.transform = "translateX(0px)";
+            sidebarIcon.classList.remove("rotate-180", "mb-1");
+            sidebarIcon.classList.add("mt-1");
+        }
+    });
+
+    overlay.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    });
+
+</script>
+
+<script>
+    function showSection(id, pushHash = true) {
+        const sections = document.querySelectorAll(".code-section");
+
+        sections.forEach(section => {
+            if (section.id === id) return;
+
+            section.classList.remove("active");
+            section.classList.add("hidden");
+
+            setTimeout(() => {
+                section.classList.add("hidden");
+            }, 300);
+        });
+
+        const active = document.getElementById(id);
+        if (!active) return;
+
+        active.classList.remove("hidden");
+        active.classList.add("active");
+
+        const title = active.querySelector(".code-title")?.innerText;
+        if (title) {
+            document.title = title + " | AC Portfolio";
+        }
+
+        if (pushHash) {
+            history.pushState(null, null, "#" + id);
+        }
+
+        // Close sidebar
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    }
+
+    window.addEventListener("hashchange", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("popstate", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("load", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id);
+        }
+    });
+</script>
+
+</html>
