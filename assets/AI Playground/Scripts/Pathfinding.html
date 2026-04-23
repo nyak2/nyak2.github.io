@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PathFinder_AStar.cs | AC Portfolio</title>
+
+    <!-- Tailwind CSS -->
+    <link href="../../../main.css" rel="stylesheet">
+
+    <!-- Prism -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-csharp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Icons -->
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
+
+</head>
+
+<body class="min-h-screen">
+    <button id="toggle-sidebar" class="code-sidebar-toggle">
+        <div id="sidebar-icon" class="code-sidebar-icon">
+            <i class="fi fi-rr-angle-right text-xl"></i>
+        </div>
+    </button>
+
+    <div id="overlay" class="code-sidebar-overlay closed"></div>
+
+    <!-- Drawer -->
+    <div id="sidebar-menu" class="code-sidebar closed">
+        <h2 class="code-sidebar-title">Scripts</h2>
+
+        <button onclick="showSection('code-1')" class="code-sidebar-link">PathFinder_AStar.cs</button>
+        <button onclick="showSection('code-2')" class="code-sidebar-link">PathFinder_LazyTheta.cs</button>
+
+    </div>
+
+    <main class="grow bg-darkGreen">
+        <section id="code-1" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title"> PathFinder_AStar.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using UnityEngine;
+public static class PathFinder_AStar
+{
+    public enum Heuristics
+    {
+        NONE = 0,
+        EUCLIDEAN = 1,
+        OCTILE = 2
+    }
+
+    private static readonly Dictionary<Heuristics, Func<Vector3Int, Vector3Int, float>> HEURISTICS = new();
+
+    private static float EUCLIDEAN(Vector3Int a, Vector3Int b)
+    {
+        float dx = b.x - a.x;
+        float dy = b.y - a.y;
+        return MathF.Sqrt(dx * dx + dy * dy);
+    }
+
+    private static float OCTILE(Vector3Int a, Vector3Int b)
+    {
+        float dx = Mathf.Abs(a.x - b.x);
+        float dy = Mathf.Abs(a.y - b.y);
+
+        return (dx + dy) + ((Mathf.Sqrt(2.0f) - 2.0f) * Mathf.Min(dx, dy));
+    }
+
+    static PathFinder_AStar()
+    {
+        HEURISTICS.Add(Heuristics.NONE, (a, b) => 0);
+        HEURISTICS.Add(Heuristics.EUCLIDEAN, EUCLIDEAN);
+        HEURISTICS.Add(Heuristics.OCTILE, OCTILE);
+    }
+
+    public static bool TryFindPath(Vector3Int startCoordinate, Vector3Int goalCoordinate, ISquareGrid grid, 
+                                    out List<Vector3Int> path, Heuristics heuristicType, out Dictionary<Vector3Int, Vector3Int?> numberOfCells, out Stopwatch time, 
+                                    bool noDiagonal, PathFinderTest.NaviType nav)
+    {
+        PriorityQueue<Vector3Int> frontier = new PriorityQueue<Vector3Int>();
+        Dictionary<Vector3Int, Vector3Int?> cameFrom = new Dictionary<Vector3Int, Vector3Int?>();
+        Dictionary<Vector3Int, float> costSoFar = new Dictionary<Vector3Int, float>();
+
+        frontier.Enqueue(startCoordinate, 0);
+
+        cameFrom[startCoordinate] = null;
+        costSoFar[startCoordinate] = 0;
+
+        var watch = Stopwatch.StartNew();
+        while (frontier.Count > 0)
+        {
+            Vector3Int coordinate = frontier.Dequeue();
+
+            if (coordinate == goalCoordinate)
+            {
+                watch.Stop();
+                break;
+            }
+
+            var connections = grid.GetCellLinks(coordinate);
+
+            foreach (CellData neighbour in connections)
+            {
+                // Diagonal restriction
+                if (neighbour.Cost < 0 ||
+                    (!noDiagonal &&
+                     Mathf.Abs(neighbour.Coordinate.x - coordinate.x) > 0 &&
+                     Mathf.Abs(neighbour.Coordinate.y - coordinate.y) > 0))
+                {
+                    continue;
+                }
+
+                int overrideCost;
+                if (!IsTraversable(neighbour, nav, out overrideCost))
+                    continue;
+
+                float calcCost = costSoFar[coordinate] + neighbour.Cost + overrideCost;
+
+                if (Mathf.Abs(neighbour.Coordinate.x - coordinate.x) > 0 && Mathf.Abs(neighbour.Coordinate.y - coordinate.y) > 0)
+                {
+                    var connect = grid.GetCellLinks(neighbour.Coordinate);
+                    bool skip = false;
+
+                    for (int i = 0; i < connect.Count; i++)
+                    {
+                        if (connect[i].Cost < neighbour.Cost)
+                        {
+                            skip = true;
+                            break;
+                        }
+
+                    }
+                    if(skip)
+                    {
+                        continue;
+                    }
+                }
+
+                if (!costSoFar.ContainsKey(neighbour.Coordinate) || calcCost < costSoFar[neighbour.Coordinate])
+                {
+                    for (int i = 0; i < connections.Count -4; i++)
+                    {
+                        if (connections[i].Cost < neighbour.Cost)
+                        {
+                            calcCost = DiagonalCheck(coordinate, neighbour.Coordinate, calcCost);
+                            break;
+                        }
+                    }
+                    costSoFar[neighbour.Coordinate] = calcCost;
+                    cameFrom[neighbour.Coordinate] = coordinate;
+                    float priority = calcCost + (HEURISTICS[heuristicType](neighbour.Coordinate, goalCoordinate));
+
+                    frontier.Enqueue(neighbour.Coordinate, priority);
+                }
+
+            }
+
+        }
+
+        time = watch;
+
+        path = new List<Vector3Int>();
+        numberOfCells = cameFrom;
+        return PathProcessor.TryGetPath(cameFrom, startCoordinate, goalCoordinate, ref path);
+    }
+
+    private static bool IsTraversable(CellData cell,PathFinderTest.NaviType nav, out int overrideCost)
+    {
+        overrideCost = 0;
+
+        if (cell.Cost < 0)
+            return false;
+
+        switch (nav)
+        {
+            case PathFinderTest.NaviType.Elf:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    return false;
+                break;
+
+            case PathFinderTest.NaviType.Golem:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Mountain)
+                    overrideCost = -(int)nav;
+                else if (cell.Cost == (int)TerrainPicker.typesTerrain.Swamp ||
+                         cell.Cost == (int)TerrainPicker.typesTerrain.Ocean ||
+                         cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    overrideCost = (int)nav + 1;
+                break;
+
+            case PathFinderTest.NaviType.SandGoblin:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    return false;
+
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Desert ||
+                    cell.Cost == (int)TerrainPicker.typesTerrain.Ocean)
+                    overrideCost = -(int)nav;
+                break;
+
+            case PathFinderTest.NaviType.Viking:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava ||
+                    cell.Cost == (int)TerrainPicker.typesTerrain.Ocean)
+                    return false;
+
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.SnowPlains)
+                    overrideCost = -(int)nav;
+                else if (cell.Cost == (int)TerrainPicker.typesTerrain.Desert ||
+                         cell.Cost == (int)TerrainPicker.typesTerrain.Swamp)
+                    overrideCost = (int)nav + 1;
+                break;
+
+            case PathFinderTest.NaviType.Ogre:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    return false;
+
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Swamp)
+                    overrideCost = -(int)nav;
+                else if (cell.Cost == (int)TerrainPicker.typesTerrain.SnowPlains ||
+                         cell.Cost == (int)TerrainPicker.typesTerrain.Mountain)
+                    overrideCost = (int)nav + 1;
+                break;
+
+            case PathFinderTest.NaviType.LadyOfTheLake:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    return false;
+
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Ocean)
+                    overrideCost = -(int)nav;
+                else if (cell.Cost == (int)TerrainPicker.typesTerrain.Swamp)
+                    overrideCost = -(int)nav + 1;
+                else if (cell.Cost == (int)TerrainPicker.typesTerrain.SnowPlains)
+                    overrideCost = (int)nav;
+                break;
+
+            case PathFinderTest.NaviType.Demon:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Ocean)
+                    return false;
+
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    overrideCost = -(int)nav;
+                else
+                    overrideCost = 3;
+                break;
+        }
+
+        return true;
+    }
+
+    private static float DiagonalCheck(Vector3Int currentCoordinate, Vector3Int endCoordinate, float prev_Cost)
+    {
+        float nudge = 0.0f;
+
+        if (Mathf.Abs(endCoordinate.x - currentCoordinate.x) > 0 && Mathf.Abs(endCoordinate.y - currentCoordinate.y) > 0)
+        {
+            nudge = 1.0f;
+        }
+
+        return prev_Cost + nudge;
+
+    }
+}
+</code></pre>
+            </div>
+        </section>
+
+        <section id="code-2" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title"> PathFinder_LazyTheta.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using UnityEngine;
+
+public static class PathFinder_LazyTheta
+{
+    public enum Heuristics
+    {
+        NONE = 0,
+        EUCLIDEAN = 1,
+        OCTILE = 2
+    }
+
+    private static readonly Dictionary<Heuristics, Func<Vector3Int, Vector3Int, float>> HEURISTICS = new();
+
+    private static float EUCLIDEAN(Vector3Int a, Vector3Int b)
+    {
+        float dx = b.x - a.x;
+        float dy = b.y - a.y;
+        return MathF.Sqrt(dx * dx + dy * dy);
+    }
+
+    private static float OCTILE(Vector3Int a, Vector3Int b)
+    {
+        float dx = Mathf.Abs(a.x - b.x);
+        float dy = Mathf.Abs(a.y - b.y);
+
+        return (dx + dy) + ((Mathf.Sqrt(2.0f) - 2.0f) * Mathf.Min(dx, dy));
+    }
+
+    static PathFinder_LazyTheta()
+    {
+        HEURISTICS.Add(Heuristics.NONE, (a, b) => 0);
+        HEURISTICS.Add(Heuristics.EUCLIDEAN, EUCLIDEAN);
+        HEURISTICS.Add(Heuristics.OCTILE, OCTILE);
+    }
+
+    public static bool TryFindPath(Vector3Int startCoordinate, Vector3Int goalCoordinate, ISquareGrid grid,
+                                    out List<Vector3Int> path, Heuristics heuristicType, out Dictionary<Vector3Int, Vector3Int?> numberOfCells, out Stopwatch time,
+                                    bool noDiagonal, PathFinderTest.NaviType nav)
+    {
+        PriorityQueue<Vector3Int> frontier = new PriorityQueue<Vector3Int>();
+        Dictionary<Vector3Int, Vector3Int?> cameFrom = new Dictionary<Vector3Int, Vector3Int?>();
+        Dictionary<Vector3Int, float> costSoFar = new Dictionary<Vector3Int, float>();
+
+        frontier.Enqueue(startCoordinate, 0);
+
+        cameFrom[startCoordinate] = null;
+        costSoFar[startCoordinate] = 0;
+
+        var watch = Stopwatch.StartNew();
+
+        while (frontier.Count > 0)
+        {
+            Vector3Int coordinate = frontier.Dequeue();
+
+            if (coordinate == goalCoordinate)
+            {
+                watch.Stop();
+                break;
+            }
+
+            Vector3Int? parentCoord = cameFrom[coordinate];
+            var connections = grid.GetCellLinks(coordinate);
+
+            foreach (CellData neighbour in connections)
+            {
+                // Diagonal restriction
+                if (neighbour.Cost < 0 ||
+                    (!noDiagonal &&
+                     Mathf.Abs(neighbour.Coordinate.x - coordinate.x) > 0 &&
+                     Mathf.Abs(neighbour.Coordinate.y - coordinate.y) > 0))
+                {
+                    continue;
+                }
+
+                int overrideCost;
+                if (!IsTraversable(neighbour, nav, out overrideCost))
+                    continue;
+
+                // ===== LAZY THETA* LOS =====
+                if (parentCoord != null && LineOfSight(parentCoord.Value, neighbour.Coordinate, grid, nav))
+                {
+                    float newCost =
+                        costSoFar[parentCoord.Value] +
+                        (HEURISTICS[heuristicType](parentCoord.Value, neighbour.Coordinate) -
+                         HEURISTICS[heuristicType](parentCoord.Value, coordinate)) +
+                        neighbour.Cost + overrideCost;
+
+                    if (!costSoFar.ContainsKey(neighbour.Coordinate) ||
+                        newCost < costSoFar[neighbour.Coordinate])
+                    {
+                        costSoFar[neighbour.Coordinate] = newCost;
+                        cameFrom[neighbour.Coordinate] = parentCoord;
+
+                        float priority =
+                            newCost +
+                            HEURISTICS[heuristicType](neighbour.Coordinate, goalCoordinate);
+
+                        frontier.Enqueue(neighbour.Coordinate, priority);
+                    }
+
+                    continue;
+                }
+
+                // ===== NORMAL A* STEP =====
+                float calcCost = costSoFar[coordinate] + neighbour.Cost + overrideCost;
+
+                if (!costSoFar.ContainsKey(neighbour.Coordinate) || calcCost < costSoFar[neighbour.Coordinate])
+                {
+                    costSoFar[neighbour.Coordinate] = calcCost;
+                    cameFrom[neighbour.Coordinate] = coordinate;
+
+                    float priority =
+                        calcCost +
+                        HEURISTICS[heuristicType](neighbour.Coordinate, goalCoordinate);
+
+                    frontier.Enqueue(neighbour.Coordinate, priority);
+                }
+            }
+        }
+
+        time = watch;
+        path = new List<Vector3Int>();
+        numberOfCells = cameFrom;
+
+        return PathProcessor.TryGetPath(
+            cameFrom,
+            startCoordinate,
+            goalCoordinate,
+            ref path);
+    }
+
+
+    private static bool IsTraversable(
+        CellData cell,
+        PathFinderTest.NaviType nav,
+        out int overrideCost)
+    {
+        overrideCost = 0;
+
+        if (cell.Cost < 0)
+            return false;
+
+        switch (nav)
+        {
+            case PathFinderTest.NaviType.Elf:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    return false;
+                break;
+
+            case PathFinderTest.NaviType.Golem:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Mountain)
+                    overrideCost = -(int)nav;
+                else if (cell.Cost == (int)TerrainPicker.typesTerrain.Swamp ||
+                         cell.Cost == (int)TerrainPicker.typesTerrain.Ocean ||
+                         cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    overrideCost = (int)nav + 1;
+                break;
+
+            case PathFinderTest.NaviType.SandGoblin:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    return false;
+
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Desert ||
+                    cell.Cost == (int)TerrainPicker.typesTerrain.Ocean)
+                    overrideCost = -(int)nav;
+                break;
+
+            case PathFinderTest.NaviType.Viking:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava ||
+                    cell.Cost == (int)TerrainPicker.typesTerrain.Ocean)
+                    return false;
+
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.SnowPlains)
+                    overrideCost = -(int)nav;
+                else if (cell.Cost == (int)TerrainPicker.typesTerrain.Desert ||
+                         cell.Cost == (int)TerrainPicker.typesTerrain.Swamp)
+                    overrideCost = (int)nav + 1;
+                break;
+
+            case PathFinderTest.NaviType.Ogre:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    return false;
+
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Swamp)
+                    overrideCost = -(int)nav;
+                else if (cell.Cost == (int)TerrainPicker.typesTerrain.SnowPlains ||
+                         cell.Cost == (int)TerrainPicker.typesTerrain.Mountain)
+                    overrideCost = (int)nav + 1;
+                break;
+
+            case PathFinderTest.NaviType.LadyOfTheLake:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    return false;
+
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Ocean)
+                    overrideCost = -(int)nav;
+                else if (cell.Cost == (int)TerrainPicker.typesTerrain.Swamp)
+                    overrideCost = -(int)nav + 1;
+                else if (cell.Cost == (int)TerrainPicker.typesTerrain.SnowPlains)
+                    overrideCost = (int)nav;
+                break;
+
+            case PathFinderTest.NaviType.Demon:
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Ocean)
+                    return false;
+
+                if (cell.Cost == (int)TerrainPicker.typesTerrain.Lava)
+                    overrideCost = -(int)nav;
+                else
+                    overrideCost = 3;
+                break;
+        }
+
+        return true;
+    }
+
+    private static bool LineOfSight(
+        Vector3Int start,
+        Vector3Int end,
+        ISquareGrid grid,
+        PathFinderTest.NaviType nav)
+    {
+        int x0 = start.x;
+        int y0 = start.y;
+        int x1 = end.x;
+        int y1 = end.y;
+
+        int dx = Mathf.Abs(x1 - x0);
+        int dy = Mathf.Abs(y1 - y0);
+        int sx = x0 < x1 ? 1 : -1;
+        int sy = y0 < y1 ? 1 : -1;
+        int err = dx - dy;
+
+        while (true)
+        {
+            Vector3Int current = new Vector3Int(x0, y0, 0);
+
+            if (current != start && current != end)
+            {
+                var cell = grid.GetCell(current);
+
+                if (cell == null)
+                    return false;
+
+                int _;
+                if (!IsTraversable(cell, nav, out _))
+                    return false;
+            }
+
+            if (x0 == x1 && y0 == y1)
+                break;
+
+            int e2 = 2 * err;
+
+            if (e2 > -dy)
+            {
+                err -= dy;
+                x0 += sx;
+            }
+
+            if (e2 < dx)
+            {
+                err += dx;
+                y0 += sy;
+            }
+        }
+
+        return true;
+    }
+}
+</code></pre>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        ©2026 Aik Chun.<br> All rights reserverd.
+    </footer>
+
+</body>
+
+<!-- Sidebar Menu -->
+<script>
+    const sidebar = document.getElementById("sidebar-menu");
+    const toggleBtn = document.getElementById("toggle-sidebar");
+    const sidebarIcon = document.getElementById("sidebar-icon");
+    const overlay = document.getElementById("overlay");
+    document.documentElement.style.setProperty(
+        "--sidebar-width",
+        sidebar.offsetWidth + "px"
+    );
+
+    let isOpen = false;
+
+    toggleBtn.addEventListener("click", () => {
+        isOpen = !isOpen;
+
+        if (isOpen) {
+            sidebar.classList.remove("closed");
+            sidebar.classList.add("open");
+
+            overlay.classList.remove("closed");
+
+            toggleBtn.style.transform = "translateX(var(--sidebar-width))";
+            sidebarIcon.classList.add("rotate-180", "mb-1");
+            sidebarIcon.classList.remove("mt-1");
+
+        } else {
+            sidebar.classList.remove("open");
+            sidebar.classList.add("closed");
+
+            overlay.classList.add("closed");
+
+            toggleBtn.style.transform = "translateX(0px)";
+            sidebarIcon.classList.remove("rotate-180", "mb-1");
+            sidebarIcon.classList.add("mt-1");
+        }
+    });
+
+    overlay.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    });
+
+</script>
+
+<script>
+    function showSection(id, pushHash = true) {
+        const sections = document.querySelectorAll(".code-section");
+
+        sections.forEach(section => {
+            if (section.id === id) return;
+
+            section.classList.remove("active");
+            section.classList.add("hidden");
+
+            setTimeout(() => {
+                section.classList.add("hidden");
+            }, 300);
+        });
+
+        const active = document.getElementById(id);
+        if (!active) return;
+
+        active.classList.remove("hidden");
+        active.classList.add("active");
+
+        const title = active.querySelector(".code-title")?.innerText;
+        if (title) {
+            document.title = title + " | AC Portfolio";
+        }
+
+        if (pushHash) {
+            history.pushState(null, null, "#" + id);
+        }
+
+        // Close sidebar
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    }
+
+    window.addEventListener("hashchange", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("popstate", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("load", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id);
+        }
+    });
+</script>
+
+</html>
