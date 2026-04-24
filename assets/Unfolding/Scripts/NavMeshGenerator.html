@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NavMeshGenerator.cs | AC Portfolio</title>
+
+    <!-- Tailwind CSS -->
+    <link href="../../../main.css" rel="stylesheet">
+
+    <!-- Prism -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-csharp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    
+    <!-- Icons -->
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
+
+</head>
+
+<body class="min-h-screen">
+    <button id="toggle-sidebar" class="code-sidebar-toggle">
+        <div id="sidebar-icon" class="code-sidebar-icon">
+            <i class="fi fi-rr-angle-right text-xl"></i>
+        </div>
+    </button>
+
+    <div id="overlay" class="code-sidebar-overlay closed"></div>
+
+    <!-- Drawer -->
+    <div id="sidebar-menu" class="code-sidebar closed">
+        <h2 class="code-sidebar-title">Scripts</h2>
+
+        <button onclick="showSection('code-1')" class="code-sidebar-link">NavMeshGenerator.cs</button>
+        
+    </div>
+
+    <main class="grow bg-darkGreen">
+        <section id="code-1" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title"> NavMeshGenerator.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using System.Collections;
+using System.Collections.Generic;
+using Unity.AI.Navigation;
+using Unity.Burst.CompilerServices;
+using UnityEngine;
+using UnityEngine.AI;
+
+public class NavMeshGenerator : MonoBehaviour
+{
+    [SerializeField] private NavMeshSurface nav;
+    [SerializeField] private NavMeshAgent player;
+
+    private bool doOnce;
+
+    // Start is called before the first frame update
+    void Awake()
+    {
+        //doOnce = true;
+
+        if (nav.navMeshData != null)
+        {
+            nav.UpdateNavMesh(nav.navMeshData);
+        }
+        else
+        {
+            nav.BuildNavMesh();
+            Debug.Log("You forgot to reference the navmesh. But it not big deal");
+        }
+    }
+
+    private void Update()
+    {
+        if (PageFlip.flipped == true && doOnce == false)
+        {
+            Debug.Log("generated nav mesh");
+            if (!nav.isActiveAndEnabled)
+            {
+                StartCoroutine(enableNavMesh());
+            }
+
+                doOnce = true;
+        }
+        else if (PageFlip.flipped == false && doOnce == true)
+        {
+            //StartCoroutine(enableNavMesh());
+
+            doOnce = false;
+        }
+
+        if(PageFlip.clicked)
+        {
+            player.enabled = false;
+            nav.enabled = false;
+        }
+        else
+        {
+            if(PageFlip.flipped)
+            {
+                player.enabled = true;
+                nav.enabled = true;
+            }
+        }
+    }
+
+    private IEnumerator enableNavMesh()
+    {
+        nav.enabled = true;
+        //yield return new WaitForSeconds(0.02f);
+        //nav.BuildNavMesh();
+        nav.UpdateNavMesh(nav.navMeshData);
+        yield return new WaitForSeconds(0.2f);
+        player.enabled = true;
+
+    }
+}
+</code></pre>
+            </div>
+        </section>       
+    </main>
+
+    <footer class="footer">
+        ©2026 Aik Chun.<br> All rights reserverd.
+    </footer>
+
+</body>
+
+<!-- Sidebar Menu -->
+<script>
+    const sidebar = document.getElementById("sidebar-menu");
+    const toggleBtn = document.getElementById("toggle-sidebar");
+    const sidebarIcon = document.getElementById("sidebar-icon");
+    const overlay = document.getElementById("overlay");
+    document.documentElement.style.setProperty(
+        "--sidebar-width",
+        sidebar.offsetWidth + "px"
+    );
+
+    let isOpen = false;
+
+    toggleBtn.addEventListener("click", () => {
+        isOpen = !isOpen;
+
+        if (isOpen) {
+            sidebar.classList.remove("closed");
+            sidebar.classList.add("open");
+
+            overlay.classList.remove("closed");
+
+            toggleBtn.style.transform = "translateX(var(--sidebar-width))";
+            sidebarIcon.classList.add("rotate-180", "mb-1");
+            sidebarIcon.classList.remove("mt-1");
+
+        } else {
+            sidebar.classList.remove("open");
+            sidebar.classList.add("closed");
+
+            overlay.classList.add("closed");
+
+            toggleBtn.style.transform = "translateX(0px)";
+            sidebarIcon.classList.remove("rotate-180", "mb-1");
+            sidebarIcon.classList.add("mt-1");
+        }
+    });
+
+    overlay.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    });
+
+</script>
+
+<script>
+    function showSection(id, pushHash = true) {
+        const sections = document.querySelectorAll(".code-section");
+
+        sections.forEach(section => {
+            if (section.id === id) return;
+
+            section.classList.remove("active");
+            section.classList.add("hidden");
+
+            setTimeout(() => {
+                section.classList.add("hidden");
+            }, 300);
+        });
+
+        const active = document.getElementById(id);
+        if (!active) return;
+
+        active.classList.remove("hidden");
+        active.classList.add("active");
+
+        const title = active.querySelector(".code-title")?.innerText;
+        if (title) {
+            document.title = title + " | AC Portfolio";
+        }
+
+        if (pushHash) {
+            history.pushState(null, null, "#" + id);
+        }
+
+        // Close sidebar
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    }
+
+    window.addEventListener("hashchange", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("popstate", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("load", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id);
+        }
+    });
+</script>
+
+</html>
