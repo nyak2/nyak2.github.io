@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UIStewardessAnimManager.cs | AC Portfolio</title>
+
+    <!-- Tailwind CSS -->
+    <link href="../../../main.css" rel="stylesheet">
+
+    <!-- Prism -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-csharp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    
+    <!-- Icons -->
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
+
+</head>
+
+<body class="min-h-screen">
+    <button id="toggle-sidebar" class="code-sidebar-toggle">
+        <div id="sidebar-icon" class="code-sidebar-icon">
+            <i class="fi fi-rr-angle-right text-xl"></i>
+        </div>
+    </button>
+
+    <div id="overlay" class="code-sidebar-overlay closed"></div>
+
+    <!-- Drawer -->
+    <div id="sidebar-menu" class="code-sidebar closed">
+        <h2 class="code-sidebar-title">Scripts</h2>
+
+        <button onclick="showSection('code-1')" class="code-sidebar-link">UIStewardessAnimManager.cs</button>
+        
+    </div>
+
+    <main class="grow bg-darkGreen">
+        <section id="code-1" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title"> UIStewardessAnimManager.cs</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-csharp">using UnityEngine;
+
+public class UIStewardessAnimManager : MonoBehaviour
+{
+    [SerializeField] private float _minSleepTime = 5.0f;
+    [SerializeField] private float _maxSleepTime = 10.0f;
+
+    private AudioSource _audioSource;
+    private Animator _uiStewardessAniamtor;
+    private float _timer;
+    private bool _pauseTimer = false;
+
+    private float _sleepTime;
+    // Start is called before the first frame update
+    void Start()
+    {
+        _audioSource = GetComponent<AudioSource>();
+        _uiStewardessAniamtor = GetComponent<Animator>();
+        RandomizeSleepTime();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if(_uiStewardessAniamtor.GetCurrentAnimatorStateInfo(0).normalizedTime > 1.0f)
+        {
+            if (_uiStewardessAniamtor.GetCurrentAnimatorStateInfo(0).IsName(GameConstants.STATE_WARNING_STEWARDESS_UI))
+            {
+                SwitchToReturnAnimation();
+            }
+            else if (_uiStewardessAniamtor.GetCurrentAnimatorStateInfo(0).IsName(GameConstants.STATE_RETURN_STEWARDESS_UI))
+            {
+                SwitchToIdleAnimation();
+
+            }
+        }
+
+        if (_pauseTimer)
+        {
+            return;
+        }
+
+        _timer += Time.deltaTime;
+
+        if (_timer >= _sleepTime)
+        {
+            _uiStewardessAniamtor.SetTrigger(GameConstants.TRIGGER_SLEEP);
+            _pauseTimer = true;
+
+            _timer = 0.0f;
+        }
+    }
+
+    public void SwitchToWarningAnimation()
+    {
+        _pauseTimer = true;
+        _timer = 0.0f;
+        _uiStewardessAniamtor.Play(GameConstants.STATE_WARNING_STEWARDESS_UI, 0, 0.0f);
+    }
+
+    private void SwitchToReturnAnimation()
+    {
+        _pauseTimer = true;
+        _timer = 0.0f;
+        _uiStewardessAniamtor.Play(GameConstants.STATE_RETURN_STEWARDESS_UI, 0, 0.0f);
+    }
+
+    private void SwitchToIdleAnimation()
+    {
+        _uiStewardessAniamtor.Play(GameConstants.STATE_IDLE_STEWARDESS_UI, 0, 0.0f);
+        _pauseTimer = false;
+        RandomizeSleepTime();
+    }
+
+    private void RandomizeSleepTime()
+    {
+        _sleepTime = Random.Range(_minSleepTime, _maxSleepTime);
+    }
+
+    public void PlaySfx()
+    {
+        _audioSource.Play();
+    }
+}
+</code></pre>
+            </div>
+        </section>       
+    </main>
+
+    <footer class="footer">
+        ©2026 Aik Chun.<br> All rights reserverd.
+    </footer>
+
+</body>
+
+<!-- Sidebar Menu -->
+<script>
+    const sidebar = document.getElementById("sidebar-menu");
+    const toggleBtn = document.getElementById("toggle-sidebar");
+    const sidebarIcon = document.getElementById("sidebar-icon");
+    const overlay = document.getElementById("overlay");
+    document.documentElement.style.setProperty(
+        "--sidebar-width",
+        sidebar.offsetWidth + "px"
+    );
+
+    let isOpen = false;
+
+    toggleBtn.addEventListener("click", () => {
+        isOpen = !isOpen;
+
+        if (isOpen) {
+            sidebar.classList.remove("closed");
+            sidebar.classList.add("open");
+
+            overlay.classList.remove("closed");
+
+            toggleBtn.style.transform = "translateX(var(--sidebar-width))";
+            sidebarIcon.classList.add("rotate-180", "mb-1");
+            sidebarIcon.classList.remove("mt-1");
+
+        } else {
+            sidebar.classList.remove("open");
+            sidebar.classList.add("closed");
+
+            overlay.classList.add("closed");
+
+            toggleBtn.style.transform = "translateX(0px)";
+            sidebarIcon.classList.remove("rotate-180", "mb-1");
+            sidebarIcon.classList.add("mt-1");
+        }
+    });
+
+    overlay.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    });
+
+</script>
+
+<script>
+    function showSection(id, pushHash = true) {
+        const sections = document.querySelectorAll(".code-section");
+
+        sections.forEach(section => {
+            if (section.id === id) return;
+
+            section.classList.remove("active");
+            section.classList.add("hidden");
+
+            setTimeout(() => {
+                section.classList.add("hidden");
+            }, 300);
+        });
+
+        const active = document.getElementById(id);
+        if (!active) return;
+
+        active.classList.remove("hidden");
+        active.classList.add("active");
+
+        const title = active.querySelector(".code-title")?.innerText;
+        if (title) {
+            document.title = title + " | AC Portfolio";
+        }
+
+        if (pushHash) {
+            history.pushState(null, null, "#" + id);
+        }
+
+        // Close sidebar
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    }
+
+    window.addEventListener("hashchange", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("popstate", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("load", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id);
+        }
+    });
+</script>
+
+</html>

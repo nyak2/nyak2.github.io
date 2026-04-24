@@ -70,7 +70,7 @@
     <main>
         <section class="relative h-100 md:h-150 lg:h-225 overflow-hidden">
             <video autoplay muted loop playsinline preload="metadata" class="work-video">
-                <source src="/assets/AfterLight/Pics/Afterlight_cover.webp">
+                <source src="/assets/AfterLight/Videos/Afterlight-Demo.webm">
             </video>
             <div class="work-overlay"></div>
             <div class="work-section">
@@ -83,7 +83,7 @@
         <section class="my-15 default-margin flex flex-col md:flex-row items-center justify-center gap-5">
             <div class="work-content-section">
                 <h2 class="work-content-title">Role</h2>
-                <p class="work-content-description">UI Programmer / Artist</p>
+                <p class="work-content-description">UI/UX Programmer / Artist</p>
             </div>
             <div class="work-content-section">
                 <h2 class="work-content-title">Game Link</h2>
@@ -100,6 +100,65 @@
             </div>
 
             <div class="default-margin flex flex-col gap-15 lg:gap-25 mb-10">
+                <!-- Work Item 1 -->
+                <div class="workItem-content">
+                    <!-- Hero Gallery (Full Width) -->
+                    <div class="workItem-gallery-container">
+                        <div class="workItem-gallery-main">
+                            <img src="" class="workItem-gallery-image">
+                            <video class="workItem-gallery-video" autoplay muted loop playsinline></video>
+
+                            <!-- Navigation Arrows -->
+                            <button class="workItem-gallery-prev">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-left"></i>
+                                </div>
+                            </button>
+                            <button class="workItem-gallery-next">
+                                <div class="mt-1">
+                                    <i class="fi fi-rr-angle-right"></i>
+                                </div>
+                            </button>
+
+                            <!-- Counter -->
+                            <div class="workItem-gallery-counter">
+                                <span class="current-index">1</span> / <span class="total-images">3</span>
+                            </div>
+                        </div>
+
+                        <!-- Thumbnail Navigation -->
+                        <div class="workItem-gallery-thumbnails">
+                            <video src="/assets/AfterLight/Videos/Stewardess-1.webm" alt="Thumb"
+                                class="workItem-gallery-thumb" data-type="video" data-caption="Idle State 1"></video>
+                            <video src="/assets/AfterLight/Videos/Stewardess-2.webm" alt="Thumb"
+                                class="workItem-gallery-thumb" data-type="video" data-caption="Idle State 2"></video>
+                            <video src="/assets/AfterLight/Videos/Stewardess-3.webm" alt="Thumb"
+                                class="workItem-gallery-thumb" data-type="video" data-caption="Warning State"></video>
+                        </div>
+                    </div>
+
+                    <!-- Title and Description Section -->
+                    <div class="workItem-details-section">
+                        <div class="workItem-details-header">
+                            <h3 class="workItem-details-title">UIStewardessAnimManager</h3>
+                            <a href="/assets/AfterLight/Scripts/UIStewardess.html" target="_blank"
+                                class="workItem-code-link">
+                                View Full Code
+                            </a>
+                        </div>
+                        <p class="workItem-details-description">
+                            Manages the animation of the stewardess UI that is placed at the top of the screen.
+                            Depending on the current game state, it switches animations and warn the player of danger
+                            coming.
+                        </p>
+                        <a href="/assets/AfterLight/Scripts/UIStewardess.html" target="_blank"
+                            class="workItem-code-link-mobile">
+                            View Full Code
+                        </a>
+                    </div>
+                </div>
+
+
                 <!-- Work Item 2 -->
                 <div class="workItem-content">
                     <!-- Hero Gallery (Full Width) -->
@@ -128,9 +187,7 @@
 
                         <!-- Thumbnail Navigation -->
                         <div class="workItem-gallery-thumbnails">
-                            <!-- <video src="/assets/RiskyBakeness/Videos/ItemShadow-Demo.webm" alt="Thumb"
-                                class="workItem-gallery-thumb" data-type="video" data-caption="Demo View"></video>
-                            <img src="/assets/RiskyBakeness/Pics/ItemShadow-1.webp" alt="Thumb"
+                            <!-- <img src="/assets/RiskyBakeness/Pics/ItemShadow-1.webp" alt="Thumb"
                                 class="workItem-gallery-thumb" data-type="image" data-caption="With Shadow">
                             <img src="/assets/RiskyBakeness/Pics/ItemShadow-2.webp" alt="Thumb"
                                 class="workItem-gallery-thumb" data-type="image" data-caption="With No Shadow"> -->
@@ -140,18 +197,8 @@
                     <!-- Title and Description Section -->
                     <div class="workItem-details-section">
                         <div class="workItem-details-header">
-                            <h3 class="workItem-details-title"></h3>
-                            <a href="/assets/Mindslayer/" target="_blank"
-                                class="workItem-code-link">
-                                View Full Code
-                            </a>
+                            <h3 class="workItem-details-title">Game Sprites</h3>
                         </div>
-                        <p class="workItem-details-description">
-                        </p>
-                        <a href="/assets/Mindslayer/" target="_blank"
-                            class="workItem-code-link-mobile">
-                            View Full Code
-                        </a>
                     </div>
                 </div>
 

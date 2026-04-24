@@ -339,7 +339,7 @@ body {
     }
 
     .code-sidebar-link {
-        @apply mb-3 hover:text-gold cursor-pointer text-start text-lg;
+        @apply mb-3 hover:text-gold cursor-pointer text-start text-lg wrap-break-word;
     }
 
     .code-sidebar-divider {
