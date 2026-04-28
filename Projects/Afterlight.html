@@ -80,17 +80,35 @@
             </div>
         </section>
 
-        <section class="my-15 default-margin flex flex-col md:flex-row items-center justify-center gap-5">
-            <div class="work-content-section">
-                <h2 class="work-content-title">Role</h2>
-                <p class="work-content-description">UI/UX Programmer / Artist</p>
+        <section class="lg:my-15 my-10 default-margin flex lg:flex-row flex-col items-center justify-center gap-10">
+            <div class="workItem-simple-gallery-container ">
+                <div class="workItem-simple-gallery-main">
+                    <img class="workItem-simple-gallery-image">
+
+                </div>
+                <div class="workItem-simple-gallery-dots"></div>
+
+                <div class="workItem-simple-gallery-data hidden">
+                    <img src="/assets/AfterLight/Pics/Afterlight-preview-1.webp">
+                    <img src="/assets/AfterLight/Pics/Afterlight-preview-2.webp">
+                    <img src="/assets/AfterLight/Pics/Afterlight-preview-3.webp">
+                    <img src="/assets/AfterLight/Pics/Afterlight-preview-4.webp">
+                </div>
             </div>
-            <div class="work-content-section">
-                <h2 class="work-content-title">Game Link</h2>
-                <!-- <p class="work-content-description"> Coming Soon</p> -->
-                <a href="https://nyak2.itch.io/afterlight" target="_blank">
-                    <p class="work-content-link"> Click Here</p>
-                </a>
+
+            <div class="flex flex-col gap-10">
+                <div class="work-content-section">
+                    <h2 class="work-content-title">Role</h2>
+                    <p class="work-content-description">UI/UX Programmer / Artist</p>
+                </div>
+
+                <div class="work-content-section">
+                    <h2 class="work-content-title">Game Link</h2>
+                    <!-- <p class="work-content-description"> Coming Soon</p> -->
+                    <a href="https://nyak2.itch.io/afterlight" target="_blank">
+                        <p class="work-content-link"> Click Here</p>
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -157,7 +175,6 @@
                         </a>
                     </div>
                 </div>
-
 
                 <!-- Work Item 2 -->
                 <div class="workItem-content">
@@ -420,7 +437,82 @@
             }
         });
     </script>
+    <script>
+        function initializeSimpleGalleries() {
+            document.querySelectorAll(".workItem-simple-gallery-container").forEach((gallery) => {
 
+                const mediaItems = gallery.querySelectorAll(".workItem-simple-gallery-data > *");
+                const displayImage = gallery.querySelector(".workItem-simple-gallery-image");
+                const dotsContainer = gallery.querySelector(".workItem-simple-gallery-dots");
+
+                let currentIndex = 0;
+                let dots = [];
+                let autoSlide;
+
+                // Create dots
+                mediaItems.forEach((_, index) => {
+                    const dot = document.createElement("div");
+                    dot.classList.add("workItem-simple-dot");
+
+                    dot.addEventListener("click", () => {
+                        updateGallery(index);
+                    });
+
+                    dotsContainer.appendChild(dot);
+                    dots.push(dot);
+                });
+
+                const updateGallery = (index) => {
+                    currentIndex = (index + mediaItems.length) % mediaItems.length;
+                    const item = mediaItems[currentIndex];
+
+                    // Fade OUT
+                    displayImage.classList.remove("show");
+
+                    setTimeout(() => {
+                        displayImage.src = item.src;
+
+                        // Force reflow
+                        void displayImage.offsetWidth;
+
+                        displayImage.classList.add("show");
+
+                        // Update dots
+                        dots.forEach((dot, i) => {
+                            dot.classList.toggle("active", i === currentIndex);
+                        });
+
+                    }, 350); // small delay for fade-out
+                };
+
+                const startAutoSlide = () => {
+                    autoSlide = setInterval(() => {
+                        const currentItem = mediaItems[currentIndex];
+
+                        updateGallery(currentIndex + 1);
+                    }, 4000);
+                };
+
+                const stopAutoSlide = () => {
+                    clearInterval(autoSlide);
+                };
+
+                gallery.addEventListener("mouseenter", stopAutoSlide);
+                gallery.addEventListener("mouseleave", startAutoSlide);
+
+                // Init
+                updateGallery(0);
+                startAutoSlide();
+            });
+        }
+
+        // Init separately
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initializeSimpleGalleries);
+        } else {
+            initializeSimpleGalleries();
+        }
+    </script>
 </body>
 
 </html>
