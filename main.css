@@ -1054,7 +1054,7 @@ body {
     padding-block: calc(var(--spacing) * 6);
   }
   .work-content-title {
-    margin-bottom: calc(var(--spacing) * 5);
+    margin-bottom: calc(var(--spacing) * 3);
     text-align: center;
     font-size: var(--text-3xl);
     line-height: var(--tw-leading, var(--text-3xl--line-height));
@@ -1063,10 +1063,6 @@ body {
     color: var(--color-darkGreen);
     text-decoration-line: underline;
     text-decoration-thickness: 2px;
-    @media (width >= 48rem) {
-      font-size: var(--text-4xl);
-      line-height: var(--tw-leading, var(--text-4xl--line-height));
-    }
   }
   .work-content-description {
     text-align: center;

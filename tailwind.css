@@ -196,7 +196,7 @@ body {
     }
 
     .work-content-title {
-        @apply text-3xl md:text-4xl font-bold text-darkGreen underline decoration-2 mb-5 text-center;
+        @apply text-3xl font-bold text-darkGreen underline decoration-2 mb-3 text-center;
     }
 
     .work-content-description {

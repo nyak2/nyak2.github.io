@@ -81,16 +81,32 @@
         </section>
 
         <section class="my-15 default-margin flex flex-col md:flex-row items-center justify-center gap-5">
-            <div class="work-content-section">
-                <h2 class="work-content-title">Role</h2>
-                <p class="work-content-description">AI, UI/UX Programmer</p>
+            <div class="workItem-simple-gallery-container ">
+                <div class="workItem-simple-gallery-main">
+                    <img class="workItem-simple-gallery-image">
+                </div>
+                <div class="workItem-simple-gallery-dots"></div>
+
+                <div class="workItem-simple-gallery-data hidden">
+                    <img src="/assets/Unfolding/Pics/Unfolding-preview-1.webp">
+                    <img src="/assets//Unfolding/Pics/Unfolding-preview-2.webp">
+                    <img src="/assets//Unfolding/Pics/Unfolding-preview-3.webp">
+                    <img src="/assets//Unfolding/Pics/Unfolding-preview-4.webp">
+                </div>
             </div>
-            <div class="work-content-section">
-                <h2 class="work-content-title">Game Link</h2>
-                <!-- <p class="work-content-description"> Coming Soon</p> -->
-                <a href="https://uowmgames.itch.io/unfolding" target="_blank">
-                    <p class="work-content-link"> Click Here</p>
-                </a>
+
+            <div class="flex flex-col gap-10">
+                <div class="work-content-section">
+                    <h2 class="work-content-title">Role</h2>
+                    <p class="work-content-description">AI, UI/UX Programmer</p>
+                </div>
+                <div class="work-content-section">
+                    <h2 class="work-content-title">Game Link</h2>
+                    <!-- <p class="work-content-description"> Coming Soon</p> -->
+                    <a href="https://uowmgames.itch.io/unfolding" target="_blank">
+                        <p class="work-content-link"> Click Here</p>
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -128,8 +144,8 @@
 
                         <!-- Thumbnail Navigation -->
                         <div class="workItem-gallery-thumbnails">
-                            <video src="/assets/Unfolding/Videos/Nav-1.webm" alt="Thumb"
-                                class="workItem-gallery-thumb" data-type="video" data-caption="Nav Mesh Demo"></video>
+                            <video src="/assets/Unfolding/Videos/Nav-1.webm" alt="Thumb" class="workItem-gallery-thumb"
+                                data-type="video" data-caption="Nav Mesh Demo"></video>
                         </div>
                     </div>
 
@@ -137,7 +153,8 @@
                     <div class="workItem-details-section">
                         <div class="workItem-details-header">
                             <h3 class="workItem-details-title">NavMesh Generator</h3>
-                            <a href="/assets/Unfolding/Scripts/NavMeshGenerator.html" target="_blank" class="workItem-code-link">
+                            <a href="/assets/Unfolding/Scripts/NavMeshGenerator.html" target="_blank"
+                                class="workItem-code-link">
                                 View Full Code
                             </a>
                         </div>
@@ -145,7 +162,8 @@
                             A runtime NavMesh management system that rebuilds and toggles navigation when flipping
                             between pages.
                         </p>
-                        <a href="/assets/Unfolding/Scripts/NavMeshGenerator.html" target="_blank" class="workItem-code-link-mobile">
+                        <a href="/assets/Unfolding/Scripts/NavMeshGenerator.html" target="_blank"
+                            class="workItem-code-link-mobile">
                             View Full Code
                         </a>
                     </div>
@@ -179,8 +197,8 @@
 
                         <!-- Thumbnail Navigation -->
                         <div class="workItem-gallery-thumbnails">
-                            <video src="/assets/Unfolding/Videos/UI-1.webm" alt="Thumb"
-                                class="workItem-gallery-thumb" data-type="video" data-caption="UI Demo"></video>
+                            <video src="/assets/Unfolding/Videos/UI-1.webm" alt="Thumb" class="workItem-gallery-thumb"
+                                data-type="video" data-caption="UI Demo"></video>
                         </div>
                     </div>
 
@@ -188,16 +206,19 @@
                     <div class="workItem-details-section">
                         <div class="workItem-details-header">
                             <h3 class="workItem-details-title">UIManager</h3>
-                            <a href="/assets/Unfolding/Scripts/UIManager.html" target="_blank" class="workItem-code-link">
+                            <a href="/assets/Unfolding/Scripts/UIManager.html" target="_blank"
+                                class="workItem-code-link">
                                 View Full Code
                             </a>
                         </div>
                         <p class="workItem-details-description">
                             A dynamic UI system that handles menu navigation, animated page transitions, and
-                            state-based object management, ensuring a smooth user experience between main menu, settings,
+                            state-based object management, ensuring a smooth user experience between main menu,
+                            settings,
                             and gameplay.
                         </p>
-                        <a href="/assets/Unfolding/Scripts/UIManager.html" target="_blank" class="workItem-code-link-mobile">
+                        <a href="/assets/Unfolding/Scripts/UIManager.html" target="_blank"
+                            class="workItem-code-link-mobile">
                             View Full Code
                         </a>
                     </div>
@@ -415,6 +436,83 @@
         });
     </script>
 
+    <script>
+        function initializeSimpleGalleries() {
+            document.querySelectorAll(".workItem-simple-gallery-container").forEach((gallery) => {
+
+                const mediaItems = gallery.querySelectorAll(".workItem-simple-gallery-data > *");
+                const displayImage = gallery.querySelector(".workItem-simple-gallery-image");
+                const dotsContainer = gallery.querySelector(".workItem-simple-gallery-dots");
+
+                let currentIndex = 0;
+                let dots = [];
+                let autoSlide;
+
+                // Create dots
+                mediaItems.forEach((_, index) => {
+                    const dot = document.createElement("div");
+                    dot.classList.add("workItem-simple-dot");
+
+                    dot.addEventListener("click", () => {
+                        updateGallery(index);
+                        stopAutoSlide();
+                    });
+
+                    dotsContainer.appendChild(dot);
+                    dots.push(dot);
+                });
+
+                const updateGallery = (index) => {
+                    currentIndex = (index + mediaItems.length) % mediaItems.length;
+                    const item = mediaItems[currentIndex];
+
+                    // Fade OUT
+                    displayImage.classList.remove("show");
+
+                    setTimeout(() => {
+                        displayImage.src = item.src;
+
+                        // Force reflow
+                        void displayImage.offsetWidth;
+
+                        displayImage.classList.add("show");
+
+                        // Update dots
+                        dots.forEach((dot, i) => {
+                            dot.classList.toggle("active", i === currentIndex);
+                        });
+
+                    }, 350); // small delay for fade-out
+                };
+
+                const startAutoSlide = () => {
+                    autoSlide = setInterval(() => {
+                        const currentItem = mediaItems[currentIndex];
+
+                        updateGallery(currentIndex + 1);
+                    }, 4000);
+                };
+
+                const stopAutoSlide = () => {
+                    clearInterval(autoSlide);
+                };
+
+                gallery.addEventListener("mouseenter", stopAutoSlide);
+                gallery.addEventListener("mouseleave", startAutoSlide);
+
+                // Init
+                updateGallery(0);
+                startAutoSlide();
+            });
+        }
+
+        // Init separately
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", initializeSimpleGalleries);
+        } else {
+            initializeSimpleGalleries();
+        }
+    </script>
 </body>
 
 </html>
