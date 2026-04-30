@@ -1596,18 +1596,19 @@ body {
     transition-property: opacity;
     transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
     transition-duration: var(--tw-duration, var(--default-transition-duration));
-    --tw-duration: 300ms;
-    transition-duration: 300ms;
+    --tw-duration: 500ms;
+    transition-duration: 500ms;
     --tw-ease: var(--ease-in-out);
     transition-timing-function: var(--ease-in-out);
   }
-  .code-section.hidden {
+  .code-section.hide {
     pointer-events: none;
-    position: absolute;
+    position: fixed;
     inset: calc(var(--spacing) * 0);
     opacity: 0%;
   }
   .code-section.active {
+    display: block;
     opacity: 100%;
   }
   .code-container {

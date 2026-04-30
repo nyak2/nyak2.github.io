@@ -198,7 +198,7 @@ public class Bowl : Utensil
             </div>
         </section>
 
-        <section id="code-2" class="code-section active">
+        <section id="code-2" class="code-section hide">
             <div class="code-container">
                 <h2 class="code-title"> Utensil.cs</h2>
                 <!-- Code Snippet Section -->
@@ -372,17 +372,13 @@ public abstract class Utensil : SerializedMonoBehaviour
             if (section.id === id) return;
 
             section.classList.remove("active");
-            section.classList.add("hidden");
-
-            setTimeout(() => {
-                section.classList.add("hidden");
-            }, 300);
+            section.classList.add("hide");
         });
 
         const active = document.getElementById(id);
         if (!active) return;
 
-        active.classList.remove("hidden");
+        active.classList.remove("hide");
         active.classList.add("active");
 
         const title = active.querySelector(".code-title")?.innerText;

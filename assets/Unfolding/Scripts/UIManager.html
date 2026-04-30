@@ -309,17 +309,13 @@ public class UIManager : MonoBehaviour
             if (section.id === id) return;
 
             section.classList.remove("active");
-            section.classList.add("hidden");
-
-            setTimeout(() => {
-                section.classList.add("hidden");
-            }, 300);
+            section.classList.add("hide");
         });
 
         const active = document.getElementById(id);
         if (!active) return;
 
-        active.classList.remove("hidden");
+        active.classList.remove("hide");
         active.classList.add("active");
 
         const title = active.querySelector(".code-title")?.innerText;

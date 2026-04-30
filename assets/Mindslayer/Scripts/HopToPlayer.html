@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBTT_HopToPlayer.h | AC Portfolio</title>
+
+    <!-- Tailwind CSS -->
+    <link href="../../../main.css" rel="stylesheet">
+
+    <!-- Prism -->
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-c.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-cpp.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/plugins/line-numbers/prism-line-numbers.min.js"></script>
+
+    <!-- Icons -->
+    <link rel='stylesheet'
+        href='https://cdn-uicons.flaticon.com/3.0.0/uicons-regular-rounded/css/uicons-regular-rounded.css'>
+    <link rel='stylesheet' href='https://cdn-uicons.flaticon.com/4.0.0/uicons-brands/css/uicons-brands.css'>
+
+</head>
+
+<body class="min-h-screen">
+    <button id="toggle-sidebar" class="code-sidebar-toggle">
+        <div id="sidebar-icon" class="code-sidebar-icon">
+            <i class="fi fi-rr-angle-right text-xl"></i>
+        </div>
+    </button>
+
+    <div id="overlay" class="code-sidebar-overlay closed"></div>
+
+    <!-- Drawer -->
+    <div id="sidebar-menu" class="code-sidebar closed">
+        <h2 class="code-sidebar-title">Scripts</h2>
+
+        <button onclick="showSection('code-1')" class="code-sidebar-link">UBTT_HopToPlayer.h</button>
+        <button onclick="showSection('code-2')" class="code-sidebar-link">UBTT_HopToPlayer.cpp</button>
+
+    </div>
+
+    <main class="grow bg-darkGreen">
+        <section id="code-1" class="code-section active">
+            <div class="code-container">
+                <h2 class="code-title">UBTT_HopToPlayer.h</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-cpp">// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "AIControllerClass/EnemyAIController.h"
+#include "NavigationSystem.h"
+#include "NavigationPath.h"
+#include "BehaviorTree/BTTaskNode.h"
+#include "AIControllerClass/UEnemyMemory.h"
+#include "BTT_HopToPlayer.generated.h"
+
+class USwarmerDataAsset;
+/**
+ * 
+ */
+
+UCLASS()
+class MINDSLAYER_API UBTT_HopToPlayer : public UBTTaskNode
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = SwarmerDataAsset)
+	TObjectPtr<USwarmerDataAsset> SwarmerData;
+
+	UPROPERTY(EditAnywhere, Category = "Navigation Properties")
+	float AcceptanceRadius;
+
+	UPROPERTY(EditAnywhere, Category = "Navigation Properties")
+	bool ReachTestIncludeAgentRadius;
+
+	UPROPERTY(EditAnywhere, Category = "Navigation Properties")
+	bool ReachTestIncludeGoalRadius;
+
+	UPROPERTY(EditAnywhere, Category = "Navigation Properties")
+	bool AllowPartialPath = false;
+
+	UPROPERTY(EditAnywhere, Category = "Navigation Properties")
+	bool CanStrafe = false;
+
+	UPROPERTY(EditAnywhere, Category = "Navigation Properties")
+	bool RequreNaviEndLocation = true;
+
+	UPROPERTY(EditAnywhere, Category = "Wander Properties", meta = (Tooltip = "Tick to so that this node will use the key selected below to hop to. If not ticked, it will default to player"))
+	bool EnableWander = false;
+
+	UPROPERTY(EditAnywhere, Category = "Wander Properties")
+	FBlackboardKeySelector WanderGoalKey;
+
+
+
+	UBTT_HopToPlayer();
+
+	EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+
+	virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	virtual void OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult);
+
+	virtual void InitializeMemory(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTMemoryInit::Type InitType) const override;
+	virtual void CleanupMemory(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTMemoryClear::Type CleanupType) const override;
+
+	virtual uint16 GetInstanceMemorySize() const override;
+
+	void OnPathFound(uint32 RequestID, ENavigationQueryResult::Type Result, TSharedPtr<FNavigationPath> Path, FHopToPlayerMemory* TaskMemory);
+
+	void SetNavigationRequest(FHopToPlayerMemory* TaskMemory);
+
+	bool HaveReachedPlayer(FHopToPlayerMemory* TaskMemory);
+
+	void PathFindToPlayer(FHopToPlayerMemory* TaskMemory);
+};
+</code></pre>
+            </div>
+        </section>
+
+        <section id="code-2" class="code-section hide">
+            <div class="code-container">
+                <h2 class="code-title">UBTT_HopToPlayer.cpp</h2>
+                <!-- Code Snippet Section -->
+                <pre class="line-numbers code-block"><code class="language-cpp">// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "TaskNodes/BTT_HopToPlayer.h"
+#include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
+#include "BehaviorTree/BlackboardComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Navigation/CrowdFollowingComponent.h"
+#include "GameFramework/Character.h"
+#include "Engine/World.h"
+#include "EngineUtils.h"
+#include "Components/CapsuleComponent.h"
+
+#include "EnemyDataAsset/SwarmerDataAsset.h"    
+
+UBTT_HopToPlayer::UBTT_HopToPlayer()
+{
+    bNotifyTick = true;
+    bNotifyTaskFinished = true;
+
+}
+
+//Start of Task
+EBTNodeResult::Type UBTT_HopToPlayer::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+    FHopToPlayerMemory* EnemyMem = CastInstanceNodeMemory<FHopToPlayerMemory>(NodeMemory);
+
+    EnemyMem->NavSystem = FNavigationSystem::GetCurrent<UNavigationSystemV1>(this);
+
+    EnemyMem->EnemyActor = Cast<AActor>(OwnerComp.GetAIOwner()->GetPawn());
+    EnemyMem->EnemyAiController = Cast<AEnemyAIController>(OwnerComp.GetAIOwner());
+    EnemyMem->PlayerActor = Cast<AActor>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+    if (!EnemyMem->PlayerActor)
+    {
+        return EBTNodeResult::Failed;
+    }
+
+    EnemyMem->SkelMesh = Cast<ACharacter>(EnemyMem->EnemyActor)->GetMesh();
+
+    if (HaveReachedPlayer(EnemyMem))
+    {
+         return EBTNodeResult::Succeeded;
+    }
+    
+    //check if can path find to player using TestPathSync (it is much faster than FindPathSync)
+    PathFindToPlayer(EnemyMem);
+
+    return EBTNodeResult::InProgress;
+}
+
+//End Task if sudden abort
+EBTNodeResult::Type UBTT_HopToPlayer::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+    FHopToPlayerMemory* EnemyMem = CastInstanceNodeMemory<FHopToPlayerMemory>(NodeMemory);
+
+    
+    EnemyMem->NavSystem->AbortAsyncFindPathRequest(EnemyMem->NavAsyncReqId);
+
+    EnemyMem->SkelMesh->GetAnimInstance()->Montage_Stop(0.25f, SwarmerData->HoppingMontage);
+
+    //EnemyMem->SkelMesh->GetAnimInstance()->Montage_Play(SwarmerData->StunMontage, 1.0f, EMontagePlayReturnType::MontageLength);
+
+    EnemyMem->EnemyAiController->StopMovement();
+    EnemyMem->EnemyAiController->GetBlackboardComponent()->SetValueAsBool("StartMove", false);
+
+    return EBTNodeResult::Aborted;
+}
+
+//Update of task
+void UBTT_HopToPlayer::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+{
+    FHopToPlayerMemory* EnemyMem = CastInstanceNodeMemory<FHopToPlayerMemory>(NodeMemory);
+
+    if (EnemyMem->bIsPathFinding)
+    {
+        //UE_LOG(LogTemp, Warning, TEXT("Stillfinding"));
+        return;
+    }
+
+
+    if (!EnemyMem->PlayerActor || !EnemyMem->bIsPathFindingSuccess || !EnemyMem->SkelMesh->GetAnimInstance())
+    {
+        FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+        return;
+    }
+
+    if (EnemyMem->bIsPaused)
+    {
+        if (!EnemyMem->PlayerActor)
+        {
+            EnemyMem->SkelMesh->GetAnimInstance()->Montage_Stop(0.25f, SwarmerData->HoppingMontage);
+            FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+            return;
+        }
+
+        if (HaveReachedPlayer(EnemyMem))
+        {
+            EnemyMem->SkelMesh->GetAnimInstance()->Montage_Stop(0.25f, SwarmerData->HoppingMontage);
+            FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+            return;
+        }
+
+        EnemyMem->PauseTimeElapsed += DeltaSeconds;
+
+        if (EnemyMem->PauseTimeElapsed >= SwarmerData->PauseInterval)
+        {
+            //EnemyMem->EnemyAiController->GetBlackboardComponent()->SetValueAsBool("StartMove", false);
+
+            if (EnableWander)
+            {
+                FinishLatentTask(OwnerComp, EBTNodeResult::Succeeded);
+            }
+            else
+            {
+                // this is so that the task will fail and loop back to this task node since it has to come here again in the behaviour tree to check 
+                // whether it has reached the player or not in ExecuteTask
+
+                FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
+                return;
+
+            }
+        }
+    }
+    else
+    {
+        EnemyMem->SkelMesh->GetAnimInstance()->Montage_Resume(SwarmerData->HoppingMontage);
+
+        if (EnemyMem->SkelMesh->GetAnimInstance()->Montage_GetCurrentSection(SwarmerData->HoppingMontage) == "StartMove" && !EnemyMem->bDoOnce)
+        {
+            EnemyMem->EnemyAiController->RequestMove(EnemyMem->MoveReq, EnemyMem->Path);
+            EnemyMem->bDoOnce = true;
+        }
+        else if (EnemyMem->SkelMesh->GetAnimInstance()->Montage_GetCurrentSection(SwarmerData->HoppingMontage) == "EndMove")
+        {
+            EnemyMem->bIsPaused = true;
+            EnemyMem->EnemyAiController->StopMovement();
+        }
+
+        //if (EnemyMem->EnemyAiController->GetBlackboardComponent()->GetValueAsBool("StartMove"))
+        //{
+        //    if (!EnemyMem->bDoOnce && EnemyMem->SkelMesh->GetAnimInstance()->GetActiveInstanceForMontage(SwarmerData->HoppingMontage))
+        //    {
+        //        EnemyMem->bDoOnce = true;
+        //        EnemyMem->EnemyAiController->RequestMove(EnemyMem->MoveReq, EnemyMem->Path);
+        //    }
+
+        //    //EnemyMem->MoveTimeElapsed += DeltaSeconds;
+        //    //if (EnemyMem->MoveTimeElapsed >= SwarmerData->MoveDuration)
+        //    //{
+        //    //    EnemyMem->bIsPaused = true;
+        //    //    EnemyMem->MoveTimeElapsed = 0.0f;
+        //    //    EnemyMem->Timer = 0.0f;
+
+        //    //    if (EnemyMem->EnemyAiController)
+        //    //    {
+        //    //        EnemyMem->EnemyAiController->StopMovement();
+        //    //        EnemyMem->SkelMesh->GetAnimInstance()->Montage_Stop(0.25f, SwarmerData->HoppingMontage);
+        //    //    }
+        //    //}
+        //}
+        //else
+        //{
+        //    if (EnemyMem->bDoOnce)
+        //    {
+        //        EnemyMem->bIsPaused = true;
+        //        EnemyMem->EnemyAiController->StopMovement();
+        //    }
+        //}
+    }
+
+    //UE_LOG(LogTemp, Error, TEXT("%s bool: %s, pauseTime: %f, moveTime: %f"), *MyMemory->Enemycontroller->GetName(), (MyMemory->bIsPaused ? TEXT("true") : TEXT("false")), MyMemory->PauseTimeElapsed, MyMemory->MoveTimeElapsed);
+}
+
+void UBTT_HopToPlayer::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+{
+    Super::OnTaskFinished(OwnerComp, NodeMemory, TaskResult);
+
+    FHopToPlayerMemory* EnemyMem = CastInstanceNodeMemory<FHopToPlayerMemory>(NodeMemory);
+
+    if (EnemyMem)
+    {
+        FMemory::Memzero(EnemyMem, sizeof(FHopToPlayerMemory));
+    }
+}
+
+void UBTT_HopToPlayer::InitializeMemory(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTMemoryInit::Type InitType) const
+{
+    InitializeNodeMemory<FHopToPlayerMemory>(NodeMemory, InitType);
+}
+
+void UBTT_HopToPlayer::CleanupMemory(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTMemoryClear::Type CleanupType) const
+{
+    CleanupNodeMemory<FHopToPlayerMemory>(NodeMemory, CleanupType);
+}
+
+uint16 UBTT_HopToPlayer::GetInstanceMemorySize() const
+{
+    return sizeof(FHopToPlayerMemory);
+}
+
+
+//A delegate where it gets called after findpathasync is done. This gets call automatically. It checks whether pathfinding was success or not
+void UBTT_HopToPlayer::OnPathFound(uint32 RequestID, ENavigationQueryResult::Type Result, TSharedPtr<FNavigationPath> Path, FHopToPlayerMemory* TaskMemory)
+{
+    TaskMemory->bIsPathFinding = false;
+
+    if (!TaskMemory->EnemyActor || !TaskMemory->PlayerActor || !TaskMemory->SkelMesh->GetAnimInstance())
+    {
+        return;
+    }
+
+    //if path result is success
+    if (Result == ENavigationQueryResult::Success && Path.IsValid() && !Path->IsPartial())
+    {
+        //UE_LOG(LogTemp, Log, TEXT("Async path found with %d points"), Path->GetPathPoints().Num());
+        SetNavigationRequest(TaskMemory);
+
+        if (TaskMemory->EnemyAiController)
+        {
+            TaskMemory->bIsPathFindingSuccess = true;
+            TaskMemory->Path = Path;
+            //TaskMemory->EnemyAiController->RequestMove(TaskMemory->MoveReq, Path);
+            TaskMemory->SkelMesh->GetAnimInstance()->Montage_Play(SwarmerData->HoppingMontage, 1.0f, EMontagePlayReturnType::Duration);
+            TaskMemory->SkelMesh->GetAnimInstance()->Montage_Pause(SwarmerData->HoppingMontage);
+        }
+    }
+    else // if path cannot be tranversed or partial
+    {
+        TaskMemory->bIsPathFindingSuccess = false;
+
+        TaskMemory->EnemyAiController->StopMovement();
+
+        if (TaskMemory->SkelMesh->GetAnimInstance()->GetActiveInstanceForMontage(SwarmerData->HoppingMontage))
+        {
+            TaskMemory->SkelMesh->GetAnimInstance()->Montage_Stop(0.25f, SwarmerData->HoppingMontage);
+        }
+
+        //UE_LOG(LogTemp, Warning, TEXT("Async pathfinding failed"));
+    }
+}
+
+
+//Return a true if reached player, else returns false if not yet reached
+bool UBTT_HopToPlayer::HaveReachedPlayer(FHopToPlayerMemory* TaskMemory)
+{
+    const float DistanceToGoal = FVector::Dist(TaskMemory->EnemyActor->GetActorLocation(), 
+        EnableWander ? TaskMemory->EnemyAiController->GetBlackBoardComp()->GetValueAsVector(WanderGoalKey.SelectedKeyName) : TaskMemory->PlayerActor->GetActorLocation());
+
+    TaskMemory->GoalCapsuleRadius = ReachTestIncludeGoalRadius ? TaskMemory->PlayerActor->FindComponentByClass<UCapsuleComponent>()->GetScaledCapsuleRadius() : 0.0f;
+    TaskMemory->AiCapsuleRadius = ReachTestIncludeAgentRadius ? TaskMemory->EnemyActor->FindComponentByClass<UCapsuleComponent>()->GetScaledCapsuleRadius() : 0.0f;
+
+    //if player reached goal location return true else return false
+    if (DistanceToGoal <= AcceptanceRadius + TaskMemory->GoalCapsuleRadius + TaskMemory->AiCapsuleRadius)
+    {
+        TaskMemory->SkelMesh->GetAnimInstance()->Montage_Stop(0.25f, SwarmerData->HoppingMontage);
+        return true;
+    }
+
+    return false;
+}
+
+//Initialize all the neccsary things for pathfinding and call FindPathAsync()
+void UBTT_HopToPlayer::PathFindToPlayer(FHopToPlayerMemory* TaskMemory)
+{
+    FPathFindingQuery Query(TaskMemory->EnemyActor, *TaskMemory->NavSystem->GetDefaultNavDataInstance(), TaskMemory->EnemyActor->GetActorLocation(), EnableWander ? 
+        TaskMemory->EnemyAiController->GetBlackBoardComp()->GetValueAsVector(WanderGoalKey.SelectedKeyName) : TaskMemory->PlayerActor->GetActorLocation());
+
+    Query.bAllowPartialPaths = AllowPartialPath;
+
+    TaskMemory->PathFindingQuery = Query;
+
+    TaskMemory->NavProp = TaskMemory->EnemyAiController->GetNavAgentPropertiesRef();
+    FPathFindingResult PathResult;
+
+    //MyMemory->path = UNavigationSystemV1::FindPathToActorSynchronously(GetWorld(), MyMemory->Enemy->GetActorLocation(), MyMemory->Player);
+    TaskMemory->FoundPathDelegate.BindUObject(this, &UBTT_HopToPlayer::OnPathFound, TaskMemory);
+    TaskMemory->NavAsyncReqId = TaskMemory->NavSystem->FindPathAsync(TaskMemory->NavProp, TaskMemory->PathFindingQuery, TaskMemory->FoundPathDelegate, EPathFindingMode::Hierarchical);
+    TaskMemory->bIsPathFinding = true;
+}
+
+//Intialize all the neccesart things for move request
+void UBTT_HopToPlayer::SetNavigationRequest(FHopToPlayerMemory* TaskMemory)
+{
+    if (EnableWander)
+    {
+        TaskMemory->MoveReq.SetGoalLocation(TaskMemory->EnemyAiController->GetBlackBoardComp()->GetValueAsVector(WanderGoalKey.SelectedKeyName));
+    }
+    else
+    {
+        TaskMemory->MoveReq.SetGoalActor(TaskMemory->PlayerActor);
+        TaskMemory->MoveReq.SetGoalLocation(TaskMemory->PlayerActor->GetActorLocation());
+    }
+
+    TaskMemory->MoveReq.SetAllowPartialPath(AllowPartialPath);
+    TaskMemory->MoveReq.SetRequireNavigableEndLocation(RequreNaviEndLocation);
+    TaskMemory->MoveReq.SetCanStrafe(CanStrafe);
+    TaskMemory->MoveReq.SetAcceptanceRadius(AcceptanceRadius);
+    TaskMemory->MoveReq.SetUsePathfinding(true);
+}
+</code></pre>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        ©2026 Aik Chun.<br> All rights reserverd.
+    </footer>
+
+</body>
+
+<!-- Sidebar Menu -->
+<script>
+    const sidebar = document.getElementById("sidebar-menu");
+    const toggleBtn = document.getElementById("toggle-sidebar");
+    const sidebarIcon = document.getElementById("sidebar-icon");
+    const overlay = document.getElementById("overlay");
+    document.documentElement.style.setProperty(
+        "--sidebar-width",
+        sidebar.offsetWidth + "px"
+    );
+
+    let isOpen = false;
+
+    toggleBtn.addEventListener("click", () => {
+        isOpen = !isOpen;
+
+        if (isOpen) {
+            sidebar.classList.remove("closed");
+            sidebar.classList.add("open");
+
+            overlay.classList.remove("closed");
+
+            toggleBtn.style.transform = "translateX(var(--sidebar-width))";
+            sidebarIcon.classList.add("rotate-180", "mb-1");
+            sidebarIcon.classList.remove("mt-1");
+
+        } else {
+            sidebar.classList.remove("open");
+            sidebar.classList.add("closed");
+
+            overlay.classList.add("closed");
+
+            toggleBtn.style.transform = "translateX(0px)";
+            sidebarIcon.classList.remove("rotate-180", "mb-1");
+            sidebarIcon.classList.add("mt-1");
+        }
+    });
+
+    overlay.addEventListener("click", () => {
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    });
+
+</script>
+
+<script>
+    function showSection(id, pushHash = true) {
+        const sections = document.querySelectorAll(".code-section");
+
+        sections.forEach(section => {
+            if (section.id === id) return;
+
+            section.classList.remove("active");
+            section.classList.add("hide");
+
+        });
+
+        const active = document.getElementById(id);
+        if (!active) return;
+
+        active.classList.remove("hide");
+        active.classList.add("active");
+
+        const title = active.querySelector(".code-title")?.innerText;
+        if (title) {
+            document.title = title + " | AC Portfolio";
+        }
+
+        if (pushHash) {
+            history.pushState(null, null, "#" + id);
+        }
+
+        // Close sidebar
+        sidebar.classList.remove("open");
+        sidebar.classList.add("closed");
+
+        overlay.classList.add("closed");
+
+        sidebarIcon.classList.remove("rotate-180", "mb-1");
+        sidebarIcon.classList.add("mt-1");
+
+        toggleBtn.style.transform = "translateX(0px)";
+        isOpen = false;
+    }
+
+    window.addEventListener("hashchange", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("popstate", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id, false);
+        }
+    });
+
+    window.addEventListener("load", () => {
+        const id = window.location.hash.replace("#", "");
+        if (id) {
+            showSection(id);
+        }
+    });
+
+</script>
+
+</html>

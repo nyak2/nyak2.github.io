@@ -140,7 +140,7 @@ namespace Gameplay
             </div>
         </section>
 
-        <section id="code-2" class="code-section active">
+        <section id="code-2" class="code-section hide">
             <div class="code-container">
                 <h2 class="code-title">IModuleChipStack.cs</h2>
                 <!-- Code Snippet Section -->
@@ -161,7 +161,7 @@ namespace Gameplay
             </div>
         </section>
 
-        <section id="code-3" class="code-section active">
+        <section id="code-3" class="code-section hide">
             <div class="code-container">
                 <h2 class="code-title">IModuleChipNonStack.cs</h2>
                 <!-- Code Snippet Section -->
@@ -182,7 +182,7 @@ namespace Gameplay
             </div>
         </section>
 
-        <section id="code-4" class="code-section active">
+        <section id="code-4" class="code-section hide">
             <div class="code-container">
                 <h2 class="code-title">ModuleChip.cs</h2>
                 <!-- Code Snippet Section -->
@@ -537,7 +537,7 @@ namespace Gameplay
             </div>
         </section>
 
-        <section id="code-5" class="code-section active">
+        <section id="code-5" class="code-section hide">
             <div class="code-container">
                 <h2 class="code-title">ModuleChipStack.cs</h2>
                 <!-- Code Snippet Section -->
@@ -605,7 +605,7 @@ namespace Gameplay
             </div>
         </section>
 
-        <section id="code-6" class="code-section active">
+        <section id="code-6" class="code-section hide">
             <div class="code-container">
                 <h2 class="code-title">ModuleChipNonStack.cs</h2>
                 <!-- Code Snippet Section -->
@@ -623,7 +623,7 @@ public abstract class ModuleChipNonStack : ModuleChip, IModuleChipNonStack
             </div>
         </section>
 
-        <section id="code-7" class="code-section active">
+        <section id="code-7" class="code-section hide">
             <div class="code-container">
                 <h2 class="code-title">ModuleReinforcedBulk.cs</h2>
                 <!-- Code Snippet Section -->
@@ -651,7 +651,7 @@ namespace Gameplay
             </div>
         </section>
 
-        <section id="code-8" class="code-section active">
+        <section id="code-8" class="code-section hide">
             <div class="code-container">
                 <h2 class="code-title">ModulePiercing.cs</h2>
                 <!-- Code Snippet Section -->
@@ -741,17 +741,13 @@ namespace Gameplay
             if (section.id === id) return;
 
             section.classList.remove("active");
-            section.classList.add("hidden");
-
-            setTimeout(() => {
-                section.classList.add("hidden");
-            }, 300);
+            section.classList.add("hide");
         });
 
         const active = document.getElementById(id);
         if (!active) return;
 
-        active.classList.remove("hidden");
+        active.classList.remove("hide");
         active.classList.add("active");
 
         const title = active.querySelector(".code-title")?.innerText;
@@ -796,6 +792,7 @@ namespace Gameplay
             showSection(id);
         }
     });
+
 </script>
 
 </html>

@@ -370,17 +370,14 @@ namespace Gameplay
             if (section.id === id) return;
 
             section.classList.remove("active");
-            section.classList.add("hidden");
+            section.classList.add("hide");
 
-            setTimeout(() => {
-                section.classList.add("hidden");
-            }, 300);
         });
 
         const active = document.getElementById(id);
         if (!active) return;
 
-        active.classList.remove("hidden");
+        active.classList.remove("hide");
         active.classList.add("active");
 
         const title = active.querySelector(".code-title")?.innerText;
@@ -425,6 +422,7 @@ namespace Gameplay
             showSection(id);
         }
     });
+
 </script>
 
 </html>
