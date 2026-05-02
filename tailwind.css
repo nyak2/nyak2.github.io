@@ -300,7 +300,7 @@ body {
     }
 
     .workItem-image-focus-image {
-        @apply block object-contain rounded px-5;
+        @apply block object-contain px-5;
     }
 
     .workItem-image-focus-image.hidden {
@@ -308,7 +308,7 @@ body {
     }
 
     .workItem-image-focus-video {
-        @apply block object-contain rounded px-5;
+        @apply block object-contain px-5;
     }
 
     .workItem-image-focus-video.hidden {

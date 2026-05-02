@@ -1366,7 +1366,6 @@ body {
   }
   .workItem-image-focus-image {
     display: block;
-    border-radius: 0.25rem;
     object-fit: contain;
     padding-inline: calc(var(--spacing) * 5);
   }
@@ -1375,7 +1374,6 @@ body {
   }
   .workItem-image-focus-video {
     display: block;
-    border-radius: 0.25rem;
     object-fit: contain;
     padding-inline: calc(var(--spacing) * 5);
   }
